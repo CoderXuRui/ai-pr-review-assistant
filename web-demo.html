@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PR Review Assistant - 使用演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .command-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .command-box .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .command-box .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        .command-box .prompt {
+            color: #4ec9b0;
+        }
+
+        .command-box .command {
+            color: #9cdcfe;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .steps {
+            display: grid;
+            gap: 15px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .step-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .feature h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .feature p {
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI PR Review Assistant</h1>
+
+        <!-- 功能介绍 -->
+        <div class="card">
+            <h2>✨ 这个工具能做什么？</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🐛</div>
+                    <h4>Bug检测</h4>
+                    <p>自动发现代码中的问题</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h4>安全检查</h4>
+                    <p>检测安全隐患</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h4>性能优化</h4>
+                    <p>找出性能问题</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📝</div>
+                    <h4>代码规范</h4>
+                    <p>检查代码风格</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速生成命令 -->
+        <div class="card">
+            <h2>🎯 快速生成命令</h2>
+            <div class="input-group">
+                <label>仓库名（例如：CoderXuRui/demo）</label>
+                <input type="text" id="repoInput" placeholder="owner/repo" value="owner/repo">
+            </div>
+            <div class="input-group">
+                <label>PR编号</label>
+                <input type="number" id="prInput" placeholder="123" value="123">
+            </div>
+            <button class="btn" onclick="generateCommand()">生成命令</button>
+
+            <div id="resultBox" class="result-box">
+                <p><strong>复制这个命令运行：</strong></p>
+                <div class="command-box" id="commandBox">
+                    <button class="copy-btn" onclick="copyCommand()">复制</button>
+                    <span class="prompt">$</span> <span class="command" id="generatedCommand"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用步骤 -->
+        <div class="card">
+            <h2>📋 使用步骤</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>打开终端</h3>
+                        <p>在项目目录下打开命令行工具</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>运行审查命令</h3>
+                        <p>使用上面生成的命令，或者自己输入：</p>
+                        <div class="command-box">
+                            <span class="prompt">$</span> <span class="command">java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>查看结果</h3>
+                        <p>工具会自动分析PR并展示审查结果！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 常用命令 -->
+        <div class="card">
+            <h2>📎 常用命令</h2>
+
+            <p><strong>查看帮助：</strong></p>
+            <div class="command-box">
+                <span class="prompt">$</span> <span class="command">java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help</span>
+            </div>
+
+            <p><strong>查看配置：</strong></p>
+            <div class="command-box">
+                <span class="prompt">$</span> <span class="command">java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config show</span>
+            </div>
+
+            <p><strong>审查PR（不发布评论）：</strong></p>
+            <div class="command-box">
+                <span class="prompt">$</span> <span class="command">java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123</span>
+            </div>
+
+            <p><strong>审查并发布评论：</strong></p>
+            <div class="command-box">
+                <span class="prompt">$</span> <span class="command">java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment</span>
+            </div>
+
+            <p><strong>保存报告到文件：</strong></p>
+            <div class="command-box">
+                <span class="prompt">$</span> <span class="command">java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --output report.md</span>
+            </div>
+        </div>
+
+        <!-- 当前状态 -->
+        <div class="card">
+            <h2>✅ 当前状态</h2>
+            <p><span class="status-badge status-success">项目已编译</span></p>
+            <p><span class="status-badge status-success">配置已加载</span></p>
+            <p><span class="status-badge status-info">DeepSeek API: 已配置</span></p>
+            <p><span class="status-badge status-info">GitHub Token: 已配置</span></p>
+
+            <div style="margin-top: 20px;">
+                <p><strong>📁 JAR文件位置：</strong></p>
+                <div class="command-box">
+                    <span class="command">target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateCommand() {
+            const repo = document.getElementById('repoInput').value || 'owner/repo';
+            const pr = document.getElementById('prInput').value || '123';
+
+            const command = `java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review ${repo} ${pr}`;
+            document.getElementById('generatedCommand').textContent = command;
+            document.getElementById('resultBox').classList.add('show');
+        }
+
+        function copyCommand() {
+            const command = document.getElementById('generatedCommand').textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '已复制！';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        generateCommand();
+    </script>
+</body>
+</html>
