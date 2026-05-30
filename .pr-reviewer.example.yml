@@ -1,0 +1,85 @@
+# AI PR Review Assistant Configuration
+# 复制此文件为 .pr-reviewer.yml 并根据需要修改
+
+github:
+  # GitHub Token (也可以通过 GITHUB_TOKEN 环境变量设置)
+  token: ""
+  # GitHub API URL (企业版可自定义)
+  apiUrl: "https://api.github.com"
+  # 是否自动发布 PR 评论
+  postComment: true
+  # 是否更新已有评论而非创建新评论
+  updateExistingComment: true
+  # 是否设置 PR 状态检查
+  setStatusCheck: true
+
+ai:
+  # 提供商: anthropic (Claude) 或 deepseek
+  provider: "deepseek"
+  # API Base URL (DeepSeek 默认为 https://api.deepseek.com)
+  baseUrl: "https://api.deepseek.com"
+  # 使用的模型:
+  # - Claude: claude-3-5-sonnet-20241022, claude-3-opus, claude-3-sonnet
+  # - DeepSeek: deepseek-chat, deepseek-coder
+  model: "deepseek-chat"
+  # API Key (DeepSeek 通过 DEEPSEEK_API_KEY 环境变量设置)
+  apiKey: ""
+  # 温度参数 (0.0-1.0, 越高越有创意)
+  temperature: 0.7
+  # 最大 Token 数
+  maxTokens: 4096
+  # 文件分块大小
+  chunkSize: 3000
+
+# 审查类别配置
+categories:
+  BUG:
+    enabled: true
+    severity: HIGH
+  SECURITY:
+    enabled: true
+    severity: CRITICAL
+  PERFORMANCE:
+    enabled: true
+    severity: MEDIUM
+  STYLE:
+    enabled: true
+    severity: LOW
+
+# 忽略的路径
+ignorePaths:
+  - "node_modules/"
+  - "target/"
+  - "build/"
+  - ".git/"
+  - "dist/"
+  - "venv/"
+  - ".venv/"
+
+# 忽略的文件模式
+ignorePatterns:
+  - "*.min.js"
+  - "*.min.css"
+  - "*.lock"
+  - "*.log"
+  - "*.png"
+  - "*.jpg"
+  - "*.jpeg"
+  - "*.gif"
+  - "*.svg"
+
+# 最大文件大小 (KB)
+maxFileSizeKB: 100
+
+# 语言特定规则
+languageRules:
+  JAVA:
+    checkNullSafety: true
+    checkSpringBestPractices: true
+  PYTHON:
+    checkTypeHints: false
+    checkPep8: true
+  JAVASCRIPT:
+    checkReactBestPractices: true
+  TYPESCRIPT:
+    checkStrictTypes: true
