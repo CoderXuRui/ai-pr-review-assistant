@@ -96,9 +96,26 @@ public class ReviewController {
                 progress.message = "正在连接 GitHub 并获取 PR 信息...";
                 progressMap.put(taskId, progress);
 
-                GithubClient github = new GithubClient(config);
-                PullRequestInfo prInfo = github.getPullRequestInfo(repoOwner, repoName, prNumber);
-                List<FileChange> changes = github.getPullRequestChanges(repoOwner, repoName, prNumber);
+                GithubClient github;
+                try {
+                    github = new GithubClient(config);
+                } catch (Exception e) {
+                    throw new RuntimeException("无法初始化 GitHub 客户端，请检查配置！", e);
+                }
+
+                PullRequestInfo prInfo;
+                try {
+                    prInfo = github.getPullRequestInfo(repoOwner, repoName, prNumber);
+                } catch (Exception e) {
+                    throw new RuntimeException("无法获取 PR 信息，请检查仓库名称和 PR 编号是否正确！", e);
+                }
+
+                List<FileChange> changes;
+                try {
+                    changes = github.getPullRequestChanges(repoOwner, repoName, prNumber);
+                } catch (Exception e) {
+                    throw new RuntimeException("无法获取 PR 文件变更信息！", e);
+                }
 
                 progress.status = "fetching";
                 progress.message = "成功获取 PR 信息，准备开始审查...";

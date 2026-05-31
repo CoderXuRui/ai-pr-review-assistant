@@ -764,9 +764,14 @@
                     body: JSON.stringify({ repoOwner, repoName, prNumber: parseInt(prNumber), postComment, runAiReview })
                 });
 
+                if (!response.ok) {
+                    throw new Error('服务器错误: ' + response.status);
+                }
+
                 const result = await response.json();
 
                 if (result.status === 'error') {
+                    clearInterval(pollInterval);
                     progressContainer.classList.remove('show');
                     showStatus('error', '审查失败: ' + result.error);
                 } else {
@@ -800,12 +805,24 @@
                     }, 500);
                 }
             } catch (e) {
+                clearInterval(pollInterval);
                 progressContainer.classList.remove('show');
-                showStatus('error', '请求失败: ' + e.message);
-            }
 
-            btn.disabled = false;
-            btn.textContent = '🚀 开始审查';
+                // 用户友好的错误提示
+                let errorMsg = e.message;
+                if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
+                    errorMsg = '无法连接到服务器，请检查网络连接或服务器是否启动！';
+                } else if (errorMsg.includes('404')) {
+                    errorMsg = '找不到该仓库或 PR，请检查仓库名称和 PR 编号！';
+                } else if (errorMsg.includes('401')) {
+                    errorMsg = 'GitHub 认证失败，请检查 API Token！';
+                }
+
+                showStatus('error', '请求失败: ' + errorMsg);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 开始审查';
+            }
         }
 
         function showStatus(type, message) {
