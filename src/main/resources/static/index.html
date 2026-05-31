@@ -824,11 +824,27 @@
             }
         }
 
+        let statusTimeout = null;
+
         function showStatus(type, message) {
             const status = document.getElementById('status');
             status.className = 'status ' + type;
             status.textContent = message;
             status.style.display = 'block';
+
+            if (statusTimeout) {
+                clearTimeout(statusTimeout);
+            }
+
+            if (type === 'success') {
+                statusTimeout = setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            } else if (type === 'error') {
+                statusTimeout = setTimeout(() => {
+                    status.style.display = 'none';
+                }, 8000);
+            }
         }
 
         function showResults(result) {
