@@ -1,5 +1,8 @@
 package com.ai.pr.reviewer.review;
 
+import com.ai.pr.reviewer.cache.CachedFileReview;
+import com.ai.pr.reviewer.cache.FileReviewCache;
+import com.ai.pr.reviewer.cache.ReviewCache;
 import com.ai.pr.reviewer.config.*;
 import com.ai.pr.reviewer.github.FileChange;
 import com.ai.pr.reviewer.github.PullRequestInfo;
@@ -19,11 +22,17 @@ public class CodeReviewEngine {
     private final ReviewConfig config;
     private final AiClient aiClient;
     private final CodeChunker chunker;
+    private final ReviewCache cache;
 
     public CodeReviewEngine(ReviewConfig config) {
+        this(config, new FileReviewCache());
+    }
+
+    public CodeReviewEngine(ReviewConfig config, ReviewCache cache) {
         this.config = config;
         this.aiClient = new AiClient(config);
         this.chunker = new CodeChunker(config.getAi().getChunkSize());
+        this.cache = cache;
     }
 
     public ReviewResult review(PullRequestInfo prInfo, List<FileChange> fileChanges) {
@@ -31,6 +40,9 @@ public class CodeReviewEngine {
         logger.info("Starting review for PR #{}: {}", prInfo.getNumber(), prInfo.getTitle());
 
         List<ReviewFinding> allFindings = new ArrayList<>();
+        String repoOwner = prInfo.getRepositoryOwner();
+        String repoName = prInfo.getRepositoryName();
+        int prNumber = prInfo.getNumber();
 
         for (FileChange file : fileChanges) {
             if (file.getChangeType() == FileChange.ChangeType.DELETED) {
@@ -41,7 +53,7 @@ public class CodeReviewEngine {
                 logger.info("Skipping file with unknown language: {}", file.getFileName());
                 continue;
             }
-            allFindings.addAll(reviewFile(file));
+            allFindings.addAll(reviewFileWithCache(repoOwner, repoName, prNumber, file));
         }
 
         String summary = generateSummary(prInfo, allFindings);
@@ -57,6 +69,22 @@ public class CodeReviewEngine {
             summary,
             duration
         );
+    }
+
+    private List<ReviewFinding> reviewFileWithCache(String repoOwner, String repoName, int prNumber, FileChange file) {
+        String fileHash = ((FileReviewCache) cache).computeHash(file.getContent());
+
+        CachedFileReview cached = cache.get(repoOwner, repoName, prNumber, file.getFileName(), fileHash);
+        if (cached != null) {
+            logger.info("Using cached review for file: {}", file.getFileName());
+            return cached.getFindings();
+        }
+
+        List<ReviewFinding> findings = reviewFile(file);
+
+        cache.put(repoOwner, repoName, prNumber, file.getFileName(), fileHash, findings);
+
+        return findings;
     }
 
     private List<ReviewFinding> reviewFile(FileChange file) {

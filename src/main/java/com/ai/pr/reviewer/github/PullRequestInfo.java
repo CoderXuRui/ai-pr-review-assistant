@@ -31,6 +31,14 @@ public class PullRequestInfo {
     }
 
     public String getRepository() { return repository; }
+    public String getRepositoryOwner() {
+        int slashIndex = repository.indexOf('/');
+        return slashIndex > 0 ? repository.substring(0, slashIndex) : repository;
+    }
+    public String getRepositoryName() {
+        int slashIndex = repository.indexOf('/');
+        return slashIndex > 0 ? repository.substring(slashIndex + 1) : repository;
+    }
     public int getNumber() { return number; }
     public String getTitle() { return title; }
     public String getBody() { return body; }

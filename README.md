@@ -69,7 +69,21 @@ mvn spring-boot:run
 
 在网页中输入仓库和 PR 号，点击"开始审查"即可！
 
-#### 方式 2：命令行使用
+#### 方式 2：Docker 运行
+
+```bash
+# 构建镜像
+mvn clean package -DskipTests
+docker build -t ai-pr-reviewer .
+
+# 运行容器
+docker run -d -p 8080:8080 \
+  -e ANTHROPIC_API_KEY="你的 Claude API Key" \
+  -e GITHUB_TOKEN="你的 GitHub Token" \
+  ai-pr-reviewer
+```
+
+#### 方式 3：命令行使用
 
 ```bash
 # 语法：java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review <仓库> <PR号>

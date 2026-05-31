@@ -1,0 +1,10 @@
+.git
+.gitignore
+target/*
+!target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar
+src/
+pom.xml
+README.md
+*.md
+.dockerignore
+Dockerfile
