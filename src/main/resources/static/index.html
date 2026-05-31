@@ -554,14 +554,7 @@
     </header>
 
     <div class="container">
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('review')">📋 审查 PR</button>
-            <button class="tab" onclick="showTab('config')">⚙️ 配置</button>
-            <button class="tab" onclick="showTab('commands')">📝 命令参考</button>
-        </div>
-
-        <!-- Review Tab -->
-        <div id="reviewTab" class="card show">
+        <div class="card show">
             <h2 class="card-title">开始审查 Pull Request</h2>
             <div class="form-group">
                 <label class="form-label">仓库信息</label>
@@ -584,40 +577,6 @@
                 <label for="runAiReview">运行 AI 代码审查</label>
             </div>
             <button class="btn btn-primary" id="reviewBtn" onclick="startReview()">🚀 开始审查</button>
-        </div>
-
-        <!-- Config Tab -->
-        <div id="configTab" class="card">
-            <h2 class="card-title">当前配置</h2>
-            <div id="configDisplay"></div>
-            <button class="btn" onclick="loadConfig()" style="margin-top: 16px;">🔄 刷新配置</button>
-        </div>
-
-        <!-- Commands Tab -->
-        <div id="commandsTab" class="card">
-            <h2 class="card-title">命令行使用参考</h2>
-            <div class="command-list">
-                <div class="command-item">
-                    <div class="label">查看帮助信息</div>
-                    <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help</div>
-                </div>
-                <div class="command-item">
-                    <div class="label">查看当前配置</div>
-                    <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config show</div>
-                </div>
-                <div class="command-item">
-                    <div class="label">审查 PR（不发布评论）</div>
-                    <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123</div>
-                </div>
-                <div class="command-item">
-                    <div class="label">审查并发布评论</div>
-                    <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment</div>
-                </div>
-                <div class="command-item">
-                    <div class="label">保存报告到文件</div>
-                    <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --output report.md</div>
-                </div>
-            </div>
         </div>
 
         <!-- Status -->
@@ -646,17 +605,6 @@
     </div>
 
     <script>
-        function showTab(tab) {
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('show'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-
-            document.getElementById(tab + 'Tab').classList.add('show');
-            event.target.classList.add('active');
-
-            if (tab === 'config') {
-                loadConfig();
-            }
-        }
 
         function renderMarkdownAdvanced(text) {
             if (!text) return '';
@@ -700,29 +648,6 @@
             return result.join('\n');
         }
 
-        async function loadConfig() {
-            try {
-                const res = await fetch('/api/config');
-                const data = await res.json();
-                displayConfig(data);
-            } catch (e) {
-                document.getElementById('configDisplay').innerHTML =
-                    '<div class="status error">无法连接到服务器: ' + e.message + '</div>';
-            }
-        }
-
-        function displayConfig(config) {
-            const html = '<div class="config-grid">' +
-                '<div class="config-item"><div class="config-key">AI 提供商</div><div class="config-value">' + (config.aiProvider || 'N/A') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">模型</div><div class="config-value">' + (config.model || 'N/A') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">Base URL</div><div class="config-value">' + (config.baseUrl || '默认') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">GitHub API</div><div class="config-value">' + (config.githubApiUrl || '默认') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">发布评论</div><div class="config-value">' + (config.postComment ? '✅ 开启' : '❌ 关闭') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">设置状态</div><div class="config-value">' + (config.setStatusCheck ? '✅ 开启' : '❌ 关闭') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">最大文件大小</div><div class="config-value">' + (config.maxFileSizeKB || 'N/A') + ' KB</div></div>' +
-                '</div>';
-            document.getElementById('configDisplay').innerHTML = html;
-        }
 
         async function startReview() {
             const repoOwner = document.getElementById('repoOwner').value;
