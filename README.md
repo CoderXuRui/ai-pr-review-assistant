@@ -1,6 +1,10 @@
 # AI PR Review Assistant
 
-一个使用 Anthropic Claude API 的 AI 驱动 GitHub PR 代码审查助手。
+一个使用 Anthropic Claude / DeepSeek API 的 AI 驱动 GitHub PR 代码审查助手。
+
+## 🚀 在线 Demo
+
+**立即体验：** [http://117.72.121.43:8081/](http://117.72.121.43:8081/)
 
 ## 功能特性
 
@@ -8,6 +12,8 @@
 - 🌍 **多语言支持**: Java, Python, JavaScript/TypeScript, Go 等
 - 📝 **灵活输出**: Markdown 报告、GitHub PR 评论、控制台输出
 - ⚙️ **可配置**: 自定义审查规则、忽略路径等
+- 💾 **智能缓存**: 缓存已审查文件，节省 Token
+- ⏱️ **实时进度**: 支持轮询查看审查进度
 - 🔧 **CLI 工具**: 易于集成到 CI/CD 流程
 - 🌐 **Web UI**: 提供友好的 Web 界面
 
@@ -20,6 +26,13 @@
 ---
 
 ## 🚀 五分钟快速上手
+
+### 测试环境准备
+
+你可以使用以下示例项目进行测试：
+- **测试仓库**：`CoderXuRui/pr-test`
+- **PR 1**：简单的测试 PR（推荐先试这个）
+- **PR 2**：包含更多问题的测试 PR
 
 ### 第一步：构建项目
 
@@ -65,9 +78,16 @@ java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config init
 mvn spring-boot:run
 ```
 
-然后打开浏览器访问：http://localhost:8080
+然后打开浏览器访问：http://localhost:8080（或在线 Demo：http://117.72.121.43:8081/）
 
-在网页中输入仓库和 PR 号，点击"开始审查"即可！
+**测试步骤：**
+1. 在"仓库主体"输入：`CoderXuRui`
+2. 在"仓库名"输入：`pr-test`
+3. 在"PR编号"输入：`1`（或 `2`）
+4. 勾选"启用 AI 代码审查"
+5. 点击"开始审查"
+
+你会看到实时进度条，几秒钟后审查结果就会出来！
 
 #### 方式 2：Docker 运行
 
@@ -76,26 +96,56 @@ mvn spring-boot:run
 mvn clean package -DskipTests
 docker build -t ai-pr-reviewer .
 
-# 运行容器
+# 运行容器（通过环境变量）
 docker run -d -p 8080:8080 \
   -e ANTHROPIC_API_KEY="你的 Claude API Key" \
   -e GITHUB_TOKEN="你的 GitHub Token" \
   ai-pr-reviewer
+
+# 或者挂载配置文件
+docker run -d -p 8080:8080 \
+  -v $(pwd)/.pr-reviewer.yml:/app/.pr-reviewer.yml \
+  ai-pr-reviewer
 ```
+
+#### 方式 3：云服务器部署
+
+参考我们的部署方式：
+1. 准备一台云服务器（阿里云/腾讯云/AWS等）
+2. 安装 Docker
+3. 上传项目文件（jar包 + Dockerfile + 配置文件）
+4. 构建并运行容器
+
+```bash
+# 在服务器上
+mvn clean package -DskipTests  # 或本地上传 jar
+docker build -t ai-pr-review-assistant:latest .
+docker run -d \
+  --name ai-pr-reviewer \
+  -p 8081:8080 \
+  -v $(pwd)/.pr-reviewer.yml:/app/.pr-reviewer.yml \
+  --restart unless-stopped \
+  ai-pr-review-assistant:latest
+```
+
+记得配置安全组开放相应端口！
 
 #### 方式 3：命令行使用
 
 ```bash
 # 语法：java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review <仓库> <PR号>
 
-# 示例：审查 facebook/react 的第 12345 号 PR
-java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review facebook/react 12345
+# 快速测试示例（推荐先试这个！）
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review CoderXuRui/pr-test 1
+
+# 审查 PR 2（包含更多问题）
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review CoderXuRui/pr-test 2
 
 # 示例：审查并发布评论到 PR
-java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review CoderXuRui/pr-test 1 --post-comment
 
 # 示例：保存报告到文件
-java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --output report.md
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review CoderXuRui/pr-test 1 --output report.md
 
 # 查看所有帮助
 java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help
@@ -305,6 +355,9 @@ jobs:
 3. **配置灵活度**: 支持 YAML 配置 + 环境变量双重覆盖
 4. **双模型支持**: Claude 和 DeepSeek 模型可切换
 5. **优雅的 Markdown 报告生成**: 结构化的问题展示与改进建议
+6. **智能文件审查缓存**: SHA-256 哈希 + 文件内容缓存，大幅节省 Token
+7. **实时进度追踪**: 支持轮询查看审查进度，提升用户体验
+8. **精美的 GitHub 风格 UI**: 深色/亮色主题，现代化设计
 
 ## 📚 第三方库引用声明
 

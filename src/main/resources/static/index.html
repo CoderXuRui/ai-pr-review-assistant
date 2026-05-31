@@ -799,8 +799,8 @@
             if (result.aiReview === 'complete') {
                 let summaryHtml = '<div class="summary-grid">' +
                     '<div class="summary-item"><div class="summary-number">' + (result.totalIssues || 0) + '</div><div class="summary-label">问题总数</div></div>' +
-                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.CRITICAL || 0) + '</div><div class="summary-label">严重问题</div></div>' +
-                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.HIGH || 0) + '</div><div class="summary-label">高优先级</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.CRITICAL || 0) + '</div><div class="summary-label">Critical</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.HIGH || 0) + '</div><div class="summary-label">High</div></div>' +
                     '<div class="summary-item"><div class="summary-number">' + ((result.reviewDuration / 1000).toFixed(1)) + 's</div><div class="summary-label">耗时</div></div>' +
                     '</div>';
 
@@ -824,13 +824,13 @@
 
                         let severityBadge = '';
                         if (finding.severity === 'CRITICAL') {
-                            severityBadge = '<span class="badge" style="background: #cf222e; color: white;">🔴 严重</span>';
+                            severityBadge = '<span class="badge" style="background: #cf222e; color: white;">🔴 Critical</span>';
                         } else if (finding.severity === 'HIGH') {
-                            severityBadge = '<span class="badge" style="background: #9a6700; color: white;">🟠 高优</span>';
+                            severityBadge = '<span class="badge" style="background: #9a6700; color: white;">🟠 High</span>';
                         } else if (finding.severity === 'MEDIUM') {
-                            severityBadge = '<span class="badge" style="background: #0969da; color: white;">🟡 中优</span>';
+                            severityBadge = '<span class="badge" style="background: #0969da; color: white;">🟡 Medium</span>';
                         } else {
-                            severityBadge = '<span class="badge" style="background: #6e7781; color: white;">🟢 低优</span>';
+                            severityBadge = '<span class="badge" style="background: #6e7781; color: white;">🟢 Low</span>';
                         }
 
                         findingsHtml +=
@@ -843,7 +843,7 @@
                             '</div>' +
                             '</div>' +
                             '<div style="margin-bottom: 8px; font-size: 13px;"><strong>文件:</strong> ' +
-                            (finding.fileName || 'N/A') + (finding.lineNumber ? ' (第 ' + finding.lineNumber + ' 行)' : '') + '</div>' +
+                            (finding.fileName || 'N/A') + (finding.lineNumber ? ' (line ' + finding.lineNumber + ')' : '') + '</div>' +
                             '<div style="margin-bottom: 8px; font-size: 14px;">' + (finding.description || '') + '</div>' +
                             (finding.suggestion ? '<div style="font-size: 14px;"><strong>💡 建议:</strong> ' + finding.suggestion + '</div>' : '') +
                             '</div>';
