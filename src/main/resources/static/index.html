@@ -740,7 +740,6 @@
             btn.disabled = true;
             btn.textContent = '⏳ 正在审查...';
 
-            document.getElementById('status').style.display = 'none';
             document.getElementById('results').classList.remove('show');
 
             const progressContainer = document.getElementById('progressContainer');
@@ -829,6 +828,7 @@
             const status = document.getElementById('status');
             status.className = 'status ' + type;
             status.textContent = message;
+            status.style.display = 'block';
         }
 
         function showResults(result) {

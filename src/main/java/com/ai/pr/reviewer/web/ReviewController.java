@@ -220,7 +220,11 @@ public class ReviewController {
             } catch (Exception e) {
                 logger.error("Review error", e);
                 progress.status = "error";
-                progress.message = "审查失败: " + e.getMessage();
+                String errorMsg = e.getMessage();
+                if (errorMsg != null && errorMsg.length() > 200) {
+                    errorMsg = errorMsg.substring(0, 200) + "...";
+                }
+                progress.message = errorMsg;
                 progressMap.put(taskId, progress);
             }
         });
