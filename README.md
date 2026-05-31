@@ -17,201 +17,158 @@
 
 （视频包含完整流程演示：拉取 PR → AI 审查 → 生成结果 → 发布评论）
 
-## 技术栈
+---
 
-- **Java 17+**: 主要开发语言
-- **Spring Boot**: Web 框架
-- **Maven**: 项目构建工具
-- **LangChain4j**: AI 模型集成
-- **GitHub API (kohsuke)**: GitHub 集成
-- **Picocli**: 命令行界面
-- **SnakeYAML**: 配置文件解析
+## 🚀 五分钟快速上手
 
-## 原创功能说明
-
-本项目为独立开发的原创作品，以下为核心原创功能：
-
-1. **智能代码分块机制**: 针对大文件的自适应 token 分块算法
-2. **多维度审查引擎**: Bug、安全、性能、代码风格四维一体审查
-3. **配置灵活度**: 支持 YAML 配置 + 环境变量双重覆盖
-4. **双模型支持**: Claude 和 DeepSeek 模型可切换
-5. **优雅的 Markdown 报告生成**: 结构化的问题展示与改进建议
-
-## 第三方库引用声明
-
-| 库名 | 版本 | 用途 | 许可证 |
-|------|------|------|--------|
-| spring-boot-starter-web | 3.2.0 | Web 框架 | Apache 2.0 |
-| langchain4j | 0.29.1 | AI 模型集成 | Apache 2.0 |
-| github-api | 1.318 | GitHub API 客户端 | MIT |
-| picocli | 4.7.5 | 命令行框架 | Apache 2.0 |
-| snakeyaml | 2.2 | YAML 解析 | Apache 2.0 |
-| lombok | 1.18.30 | 简化代码 | MIT |
-| slf4j-api | 2.0.9 | 日志接口 | MIT |
-| logback-classic | 1.4.11 | 日志实现 | LGPL 2.1 |
-| junit-jupiter | 5.10.1 | 单元测试 | EPL 2.0 |
-
-完整依赖列表请查看 `pom.xml`。
-
-## 加分项说明
-
-### 1. 自定义规则引擎设计
-- 支持通过配置文件动态启用/禁用审查类别
-- 每个类别可独立配置严重程度
-- 灵活的忽略路径和文件模式配置
-
-### 2. 代码分块优化
-- 按方法边界智能分割，避免语义截断
-- 自动计算 token 使用量，防止超限
-- 支持可配置的分块大小
-
-### 3. 配置管理优雅设计
-- 支持 YAML 文件、环境变量、命令行参数三级配置
-- 敏感信息（API Key）通过环境变量注入，不硬编码
-- 提供配置示例和初始化命令
-
-## 快速开始
-
-### 前置要求
-
-- Java 17+
-- Maven 3.8+
-- Anthropic API Key 或 DeepSeek API Key
-- GitHub Personal Access Token (可选，用于发布评论)
-
-### 构建
+### 第一步：构建项目
 
 ```bash
-mvn clean package
+# 确保你安装了 Java 17+ 和 Maven 3.8+
+mvn clean package -DskipTests
 ```
 
-### 安装
+构建成功后，会在 `target/` 目录生成 `pr-reviewer-1.0.0-SNAPSHOT.jar`
 
-构建后会在 `target/` 目录生成 jar 文件:
+### 第二步：配置 API Key
+
+选择以下一种方式配置（推荐使用环境变量）：
+
+**方式 A：使用环境变量（推荐）**
 
 ```bash
-java -jar target/pr-reviewer-1.0.0-SNAPSHOT.jar --help
+# 使用 Claude (推荐)
+export ANTHROPIC_API_KEY="你的 Claude API Key"
+
+# 或者使用 DeepSeek
+export DEEPSEEK_API_KEY="你的 DeepSeek API Key"
+
+# 可选：配置 GitHub Token (用于发布评论)
+export GITHUB_TOKEN="你的 GitHub Personal Access Token"
 ```
 
-或者使用 Maven 直接运行:
+**方式 B：使用配置文件**
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.ai.pr.reviewer.PrReviewerApplication" -Dexec.args="--help"
+# 生成配置文件
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config init
+
+# 编辑生成的 .pr-reviewer.yml，填入你的 API Key
 ```
 
-## 部署步骤
+### 第三步：开始使用！
 
-### 1. 环境变量配置
+#### 方式 1：命令行使用
 
 ```bash
-export ANTHROPIC_API_KEY="your-anthropic-api-key"
-export DEEPSEEK_API_KEY="your-deepseek-api-key"  # 二选一
-export GITHUB_TOKEN="your-github-token"  # 可选
+# 语法：java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review <仓库> <PR号>
+
+# 示例：审查 facebook/react 的第 12345 号 PR
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review facebook/react 12345
+
+# 示例：审查并发布评论到 PR
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment
+
+# 示例：保存报告到文件
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --output report.md
+
+# 查看所有帮助
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review --help
 ```
 
-### 2. 运行 CLI 工具
+#### 方式 2：Web UI 使用
 
 ```bash
-java -jar target/pr-reviewer-1.0.0-SNAPSHOT.jar review owner/repo 123
-```
-
-### 3. 运行 Web 服务
-
-```bash
+# 启动 Web 服务
 mvn spring-boot:run
 ```
 
-访问 http://localhost:8080 使用 Web 界面。
+然后打开浏览器访问：http://localhost:8080
 
-## 使用方法
+在网页中输入仓库和 PR 号，点击"开始审查"即可！
 
-### 配置
+---
 
-1. 初始化配置文件:
+## 📖 详细使用指南
 
-```bash
-pr-reviewer config init
-```
+### 1. 命令行命令说明
 
-2. 编辑 `.pr-reviewer.yml` 填入您的 API 密钥，或者使用环境变量:
+#### review 命令 - 审查 PR
 
 ```bash
-export ANTHROPIC_API_KEY="your-api-key"
-export GITHUB_TOKEN="your-github-token"
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review <仓库> <PR号> [选项]
 ```
 
-### 审查 PR
+**参数说明：**
 
-基本用法:
+| 参数 | 说明 |
+|------|------|
+| `<仓库>` | 仓库，格式为 `owner/repo`，例如 `facebook/react` |
+| `<PR号>` | PR 编号，例如 `123` |
+
+**选项说明：**
+
+| 选项 | 说明 |
+|------|------|
+| `--post-comment` | 发布审查结果作为 PR 评论 |
+| `--set-status` | 设置 PR 的状态检查（成功/失败） |
+| `--output <文件>` | 保存 Markdown 报告到指定文件 |
+| `--dry-run` | 试运行，不实际发布评论或设置状态 |
+| `--config <文件>` | 使用指定的配置文件 |
+
+**使用示例：**
 
 ```bash
-pr-reviewer review owner/repo 123
+# 基本审查，仅控制台输出
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review facebook/react 123
+
+# 审查并发布评论
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment
+
+# 保存报告到文件
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --output report.md
+
+# 完整功能：发布评论 + 设置状态 + 保存报告
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment --set-status --output report.md
 ```
 
-发布评论到 PR:
+#### config 命令 - 配置管理
 
 ```bash
-pr-reviewer review owner/repo 123 --post-comment
+# 初始化配置文件
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config init
+
+# 显示当前配置
+java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config show
 ```
 
-保存报告到文件:
+### 2. 配置文件详解
 
-```bash
-pr-reviewer review owner/repo 123 --output report.md
-```
-
-完整选项:
-
-```bash
-pr-reviewer review --help
-```
-
-### 配置管理
-
-显示当前配置:
-
-```bash
-pr-reviewer config show
-```
-
-初始化配置文件:
-
-```bash
-pr-reviewer config init
-```
-
-## 配置参考
-
-示例 `.pr-reviewer.yml`:
+生成的 `.pr-reviewer.yml` 配置文件说明：
 
 ```yaml
 github:
-  token: "github-token-here"
-  apiUrl: "https://api.github.com"
-  postComment: true
-  updateExistingComment: true
-  setStatusCheck: true
+  token: "github-token-here"           # GitHub Token (可选，也可用环境变量)
+  apiUrl: "https://api.github.com"     # GitHub API 地址
+  postComment: true                    # 是否自动发布评论
+  updateExistingComment: true          # 是否更新已有评论
+  setStatusCheck: true                 # 是否设置状态检查
 
 ai:
-  model: "claude-3-5-sonnet-20241022"
-  apiKey: "anthropic-api-key-here"
-  temperature: 0.7
-  maxTokens: 4096
-  chunkSize: 3000
+  provider: "anthropic"                # AI 提供商: anthropic (Claude) 或 deepseek
+  model: "claude-3-5-sonnet-20241022"  # 模型名称 (DeepSeek 用 "deepseek-chat")
+  baseUrl: null                        # 自定义 API 地址 (可选)
+  apiKey: "anthropic-api-key-here"     # API Key (可选，也可用环境变量)
+  temperature: 0.7                     # 温度参数 (0.0-2.0)
+  maxTokens: 4096                      # 最大 Token 数
+  chunkSize: 3000                      # 代码分块大小（字符数）
 
 categories:
-  BUG:
-    enabled: true
-    severity: HIGH
-  SECURITY:
-    enabled: true
-    severity: CRITICAL
-  PERFORMANCE:
-    enabled: true
-    severity: MEDIUM
-  STYLE:
-    enabled: true
-    severity: LOW
+  BUG: { enabled: true, severity: HIGH }          # Bug 检查
+  SECURITY: { enabled: true, severity: CRITICAL } # 安全检查
+  PERFORMANCE: { enabled: true, severity: MEDIUM }# 性能检查
+  STYLE: { enabled: true, severity: LOW }         # 风格检查
 
 ignorePaths:
   - "node_modules/"
@@ -227,9 +184,56 @@ ignorePatterns:
 maxFileSizeKB: 100
 ```
 
-## CI/CD 集成
+### 3. 获取 GitHub Token
+
+如果需要发布评论到 PR，需要获取 GitHub Personal Access Token：
+
+1. 访问 https://github.com/settings/tokens
+2. 点击 "Generate new token (classic)"
+3. 选择 scopes：至少需要 `repo` 权限
+4. 生成并保存 Token（只显示一次！）
+
+---
+
+## 💡 使用技巧
+
+### 技巧 1：创建 alias 简化命令
+
+```bash
+# 添加到 ~/.bashrc 或 ~/.zshrc
+alias pr-reviewer='java -jar /path/to/target/pr-reviewer-1.0.0-SNAPSHOT.jar'
+
+# 然后就可以这样用了！
+pr-reviewer review owner/repo 123
+```
+
+### 技巧 2：使用 DeepSeek 替代 Claude
+
+编辑配置文件：
+
+```yaml
+ai:
+  provider: "deepseek"
+  model: "deepseek-chat"
+```
+
+或者设置环境变量：
+
+```bash
+export DEEPSEEK_API_KEY="你的 DeepSeek API Key"
+```
+
+### 技巧 3：在 CI/CD 中使用
+
+参考下方的 GitHub Actions 示例。
+
+---
+
+## 🔧 CI/CD 集成
 
 ### GitHub Actions 示例
+
+在仓库中创建 `.github/workflows/ai-pr-review.yml`：
 
 ```yaml
 name: AI PR Review
@@ -256,13 +260,76 @@ jobs:
             --post-comment
 ```
 
-## 退出码
+---
 
-- `0`: 审查完成，无严重问题
-- `1`: 执行错误
-- `2`: 审查完成，发现严重问题
+## 📊 退出码说明
 
-## 项目结构
+| 退出码 | 说明 |
+|--------|------|
+| `0` | 审查完成，无严重问题 |
+| `1` | 执行错误 |
+| `2` | 审查完成，发现严重问题 |
+
+---
+
+## 🛠️ 技术栈
+
+- **Java 17+**: 主要开发语言
+- **Spring Boot**: Web 框架
+- **Maven**: 项目构建工具
+- **LangChain4j**: AI 模型集成
+- **GitHub API (kohsuke)**: GitHub 集成
+- **Picocli**: 命令行界面
+- **Jackson**: JSON/YAML 配置解析
+
+## ✨ 原创功能说明
+
+本项目为独立开发的原创作品，以下为核心原创功能：
+
+1. **智能代码分块机制**: 针对大文件的按行分割算法
+2. **多维度审查引擎**: Bug、安全、性能、代码风格四维一体审查
+3. **配置灵活度**: 支持 YAML 配置 + 环境变量双重覆盖
+4. **双模型支持**: Claude 和 DeepSeek 模型可切换
+5. **优雅的 Markdown 报告生成**: 结构化的问题展示与改进建议
+
+## 📚 第三方库引用声明
+
+| 库名 | 版本 | 用途 | 许可证 |
+|------|------|------|--------|
+| spring-boot-starter-web | 3.2.5 | Web 框架 | Apache 2.0 |
+| langchain4j | 0.34.0 | AI 模型集成 | Apache 2.0 |
+| langchain4j-anthropic | 0.34.0 | Claude 集成 | Apache 2.0 |
+| langchain4j-open-ai | 0.34.0 | DeepSeek 集成 | Apache 2.0 |
+| github-api | 1.319 | GitHub API 客户端 | MIT |
+| jackson-databind | (managed) | JSON 处理 | Apache 2.0 |
+| jackson-dataformat-yaml | (managed) | YAML 解析 | Apache 2.0 |
+| picocli | 4.7.5 | 命令行框架 | Apache 2.0 |
+| slf4j-api | (managed) | 日志接口 | MIT |
+| logback-classic | (managed) | 日志实现 | LGPL 2.1 |
+| junit-jupiter | 5.10.2 | 单元测试 | EPL 2.0 |
+| assertj-core | 3.25.3 | 测试断言 | Apache 2.0 |
+| mockito-core | 5.11.0 | Mock 测试 | MIT |
+
+完整依赖列表请查看 `pom.xml`。
+
+## 🏆 加分项说明
+
+### 1. 自定义规则引擎设计
+- 支持通过配置文件动态启用/禁用审查类别
+- 每个类别可独立配置严重程度
+- 灵活的忽略路径和文件模式配置
+
+### 2. 代码分块优化
+- 按行分割，避免在单行中间截断
+- 可配置的分块大小（字符数）
+- 保留行号信息，便于定位问题
+
+### 3. 配置管理优雅设计
+- 支持 YAML 文件、环境变量、命令行参数三级配置
+- 敏感信息（API Key）通过环境变量注入，不硬编码
+- 提供配置示例和初始化命令
+
+## 📂 项目结构
 
 ```
 src/main/java/com/ai/pr/reviewer/
@@ -275,6 +342,6 @@ src/main/java/com/ai/pr/reviewer/
 └── web/                            # Web UI
 ```
 
-## 许可证
+## 📄 许可证
 
 MIT License
