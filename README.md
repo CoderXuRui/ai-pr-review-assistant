@@ -60,10 +60,8 @@ mvn clean package -DskipTests
 **方式 A：使用环境变量（推荐）**
 
 ```bash
-# 使用 Claude (推荐)
-export ANTHROPIC_API_KEY="你的 Claude API Key"
 
-# 或者使用 DeepSeek
+# 使用 DeepSeek
 export DEEPSEEK_API_KEY="你的 DeepSeek API Key"
 
 # 可选：配置 GitHub Token (用于发布评论)
@@ -166,322 +164,149 @@ java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review --help
 
 ## 📋 完整审查报告示例
 
-以下是审查 `CoderXuRui/pr-test` PR #2 的完整报告示例：
+以下是审查 `CoderXuRui/java-bug-demo` PR 的完整报告示例：
 
 ---
 
-<!-- AI PR Review Assistant -->
+## 📊 审查结果
 
-# AI PR 审查报告
+**标题**: feat: 添加Java buggy演示项目  
+**作者**: CoderXuRui  
+**描述**: - 用户管理模块 - 数值计算模块 - 字符串工具模块 - 购物车模块 - 并发问题演示  
+**变更文件数**: 8 个  
 
-**仓库**: CoderXuRui/pr-test  
-**PR #2**: 测试PR2 - 添加新功能  
-**审查耗时**: 8.3 秒  
+变更文件列表:
+- java-bug-demo/README.md
+- java-bug-demo/pom.xml
+- java-bug-demo/src/main/java/com/buggy/app/Main.java
+- java-bug-demo/src/main/java/com/buggy/app/NumberCruncher.java
+- java-bug-demo/src/main/java/com/buggy/app/RaceConditionDemo.java
+- java-bug-demo/src/main/java/com/buggy/app/ShoppingCart.java
+- java-bug-demo/src/main/java/com/buggy/app/StringUtils.java
+- java-bug-demo/src/main/java/com/buggy/app/UserManager.java
 
-## 审查摘要
-
-| 严重程度 | 数量 |
-|----------|------|
-| 🔴 Critical | 1 |
-| 🟠 High | 2 |
-| 🟡 Medium | 1 |
-| 🟢 Low | 3 |
-
-**总计**: 7 个问题  
-
-⚠️ **注意**: 发现严重级别问题！
-
-## 按严重程度分类
-
-### 🔴 Critical (1)
-
-#### 🔴 SQL 注入漏洞
-
-**文件**: `src/main/java/com/example/UserController.java` L45  
-**类别**: 安全问题
-
-**描述**:
-
-直接拼接 SQL 语句，存在 SQL 注入漏洞。攻击者可以通过构造恶意的 userName 参数来执行任意 SQL。
-
-**建议**:
-
-使用 PreparedStatement 代替 Statement，参数化查询。
-
-**代码片段**:
-
-```
-String sql = "SELECT * FROM users WHERE name = '" + userName + "'";
-ResultSet rs = statement.executeQuery(sql);
-```
+| 问题总数 | Critical | High | Medium | Low | 耗时 |
+|---------|---------|---------|---------|---------|---------|
+| 38 | 12 | 14 | 7 | 5 | 7.9s |
 
 ---
 
-### 🟠 High (2)
+## 📝 审查摘要
 
-#### 🟠 硬编码的 API Key
+### PR 审查总结
 
-**文件**: `src/main/java/com/example/ApiService.java` L12  
-**类别**: 安全问题
+**PR 标题**: feat: 添加 Java buggy 演示项目
 
-**描述**:
+**审查发现摘要**: Critical: 12 | High: 14 | Medium: 7 | Low: 5
 
-API Key 直接硬编码在代码中，存在严重的安全风险。如果代码泄露，攻击者可以使用这个 Key。
+#### 1. 整体评价
+该 PR 引入了一个含有故意缺陷的 Java 演示项目，涵盖用户管理、数值计算、字符串工具、购物车及并发问题模块。作为"buggy 演示"项目，其目的是展示常见的编码错误，但当前 26 个 Critical/High 级别问题数量偏高，部分缺陷可能导致数据损坏、安全漏洞或运行时崩溃，严重超出了常规演示可接受的"小错误"范畴。若项目意图是教学演示，建议明确标注每个问题对应知识点，并确保不引入真实安全风险。
 
-**建议**:
+#### 2. 最需要关注的问题
+- **Critical 问题（12 个）**：大概率包含 SQL 注入、未校验的用户输入、竞态条件、资源泄露（如未关闭连接）等。这些缺陷在生产环境中会直接引发数据泄露、系统崩溃或不可恢复的错误。
+- **High 问题（14 个）**：可能涉及不正确的锁使用、数值溢出、空指针引用、无效状态处理等。演示项目中若存在此类问题，使用者可能会误解正确的实现方式。
 
-将 API Key 存储在环境变量或配置文件中，不要提交到代码仓库。
+#### 3. 改进建议
+- 为每个"bug"添加注释：在代码中用 `// BUG:` 标记并简要说明问题类型及后果，帮助学习者识别并理解。
+- 降低关键缺陷数量：将 critical 问题减少至 3 个以内，high 问题控制在 5 个以内，以保持演示的聚焦性和可控性。
+- 提供"修复分支"：在同一个 repo 中增加 `fixed` 分支或单独补丁文件，展示正确做法。
+- 补充 README：明确说明项目目的、每个模块演示的错误类别、以及如何安全地运行（如禁止在真实环境部署）。
 
-**代码片段**:
+#### 4. 可以合并的条件（如果适用）
+不推荐直接合并。若项目坚持作为"buggy 演示"保留，必须满足以下条件后方可合并：
 
-```
-private static final String API_KEY = "sk-1234567890abcdef";
-```
+- [ ] 所有 Critical 和 High 缺陷已被显式标记，且不会在常规 JVM 环境下触发不可恢复的崩溃。
+- [ ] 项目中不存在真实的安全漏洞（如硬编码凭证、允许未授权命令执行等）。
+- [ ] 至少有一个对应的测试文件或文档，演示每个 bug 的触发方式。
+- [ ] 在 PR 描述或仓库首页明确注明"⚠ 包含故意缺陷，严禁用于生产环境"。
 
----
-
-#### 🟠 空指针异常风险
-
-**文件**: `src/main/java/com/example/UserService.java` L23  
-**类别**: Bug
-
-**描述**:
-
-user 对象可能为 null，直接调用 getName() 会导致 NullPointerException。建议在使用前进行空值检查。
-
-**建议**:
-
-添加空值检查或使用 Optional。
-
-**代码片段**:
-
-```
-return user.getName().toUpperCase();
-```
+若项目无法满足上述条件，建议先重构为"有注释的 bug 演示"后再合并。
 
 ---
 
-### 🟡 Medium (1)
+## 🔍 发现的问题
 
-#### 🟡 性能问题 - 循环内查询数据库
+### 硬编码数据库密码
+**🔴 Critical** | **SECURITY**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 6)
 
-**文件**: `src/main/java/com/example/OrderService.java` L30  
-**类别**: 性能问题
+数据库密码 'admin123' 直接硬编码在代码中，容易被反编译或泄露，存在严重安全风险。
 
-**描述**:
-
-在循环中每次都查询数据库，会导致 N+1 查询问题，性能较差。建议批量查询。
-
-**建议**:
-
-先批量查询所有需要的用户，再在内存中匹配。
-
-**代码片段**:
-
-```
-for (Order order : orders) {
-    User user = userDao.findById(order.getUserId());
-    order.setUserName(user.getName());
-}
-```
+**💡 建议**: 将密码移出代码，使用环境变量、配置中心或密钥管理服务（如 AWS Secrets Manager、Vault）来安全存储。
 
 ---
 
-### 🟢 Low (3)
+### 硬编码API密钥
+**🔴 Critical** | **SECURITY**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 7)
 
-#### 🟢 缺少 Javadoc 注释
+API 密钥 'sk_live_abc123xyz' 直接硬编码在代码中，攻击者可利用该密钥访问敏感资源或服务。
 
-**文件**: `src/main/java/com/example/ProductService.java` L15  
-**类别**: 代码风格
-
-**描述**:
-
-公共方法缺少 Javadoc 注释，影响代码可维护性和可读性。建议添加注释说明方法功能、参数、返回值。
+**💡 建议**: 与数据库密码相同，应通过安全的外部配置注入，避免硬编码。
 
 ---
 
-#### 🟢 变量命名不够清晰
+### 在控制台打印敏感信息
+**🔴 Critical** | **SECURITY**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 11)
 
-**文件**: `src/main/java/com/example/Utils.java` L8  
-**类别**: 代码风格
+代码将数据库密码直接输出到控制台，导致敏感信息泄露，攻击者可通过日志或控制台输出获取密码。
 
-**描述**:
-
-变量名 'a' 不具有描述性，建议使用有意义的名称，提高代码可读性。
-
-**代码片段**:
-
-```
-int a = calculate();
-```
+**💡 建议**: 移除该打印语句，或仅在调试模式下输出脱敏后的信息（如只显示前两位字符）。
 
 ---
 
-#### 🟢 使用魔法数字
+### 数组越界风险
+**🟠 High** | **BUG**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 22)
 
-**文件**: `src/main/java/com/example/Config.java` L10  
-**类别**: 代码风格
+调用 manager.getUser(10) 时，若 UserManager 内部仅存储了两个用户（索引 0 和 1），访问索引 10 将抛出 ArrayIndexOutOfBoundsException 或其他数据越界异常。
 
-**描述**:
-
-代码中使用了魔法数字 30，建议定义为常量并添加注释说明含义。
-
-**代码片段**:
-
-```
-int timeout = 30;
-```
+**💡 建议**: 在 getUser 方法内部增加索引合法性检查，或返回 Optional 并做好防御性编程。调用方也应先检查大小或使用安全的方法。
 
 ---
 
-## 按类别分类
+### 除零异常
+**🟠 High** | **BUG**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 25)
 
-### Bug (1)
+调用 cruncher.divide(100, 0) 时，除数为 0，将抛出 ArithmeticException（整数除法）或产生 Infinity/NaN（浮点数除法），导致程序崩溃或产生意外结果。
 
-#### 🟠 空指针异常风险
-
-**文件**: `src/main/java/com/example/UserService.java` L23  
-**类别**: Bug
-
-**描述**:
-
-user 对象可能为 null，直接调用 getName() 会导致 NullPointerException。建议在使用前进行空值检查。
-
-**建议**:
-
-添加空值检查或使用 Optional。
-
-**代码片段**:
-
-```
-return user.getName().toUpperCase();
-```
+**💡 建议**: 在 divide 方法中进行除数非零验证，若为 0 则抛出明确的 IllegalArgumentException 或返回 Optional 值。调用方也应避免传递 0 或捕获异常。
 
 ---
 
-### 安全问题 (2)
+### 空指针传递可能导致崩溃
+**🟠 High** | **BUG**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 28)
 
-#### 🔴 SQL 注入漏洞
+将 null 传递给 utils.reverse() 方法，若方法内部未对 null 做防御，将立即抛出 NullPointerException。
 
-**文件**: `src/main/java/com/example/UserController.java` L45  
-**类别**: 安全问题
-
-**描述**:
-
-直接拼接 SQL 语句，存在 SQL 注入漏洞。攻击者可以通过构造恶意的 userName 参数来执行任意 SQL。
-
-**建议**:
-
-使用 PreparedStatement 代替 Statement，参数化查询。
-
-**代码片段**:
-
-```
-String sql = "SELECT * FROM users WHERE name = '" + userName + "'";
-ResultSet rs = statement.executeQuery(sql);
-```
+**💡 建议**: 在 reverse 方法中添加 null 检查，返回空字符串或 null 本身；调用方也应避免传递 null。
 
 ---
 
-#### 🟠 硬编码的 API Key
+### 无意义的类名和类设计
+**🟢 Low** | **STYLE**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 40)
 
-**文件**: `src/main/java/com/example/ApiService.java` L12  
-**类别**: 安全问题
+类名 'XYZ' 不具有业务含义，不符合命名约定；且该类仅有一个简单的输出方法，未被其他代码使用，可能是冗余代码。
 
-**描述**:
-
-API Key 直接硬编码在代码中，存在严重的安全风险。如果代码泄露，攻击者可以使用这个 Key。
-
-**建议**:
-
-将 API Key 存储在环境变量或配置文件中，不要提交到代码仓库。
-
-**代码片段**:
-
-```
-private static final String API_KEY = "sk-1234567890abcdef";
-```
+**💡 建议**: 删除无用类，或赋予其有意义的名称（如 UtilityDemo），并考虑是否真正需要。
 
 ---
 
-### 性能问题 (1)
+### 未使用的 import
+**🟢 Low** | **STYLE**  
+**文件**: java-bug-demo/src/main/java/com/buggy/app/Main.java (line 2)
 
-#### 🟡 性能问题 - 循环内查询数据库
+导入的 java.util.* 在当前代码中未被使用，会造成代码冗余和阅读混乱。
 
-**文件**: `src/main/java/com/example/OrderService.java` L30  
-**类别**: 性能问题
-
-**描述**:
-
-在循环中每次都查询数据库，会导致 N+1 查询问题，性能较差。建议批量查询。
-
-**建议**:
-
-先批量查询所有需要的用户，再在内存中匹配。
-
-**代码片段**:
-
-```
-for (Order order : orders) {
-    User user = userDao.findById(order.getUserId());
-    order.setUserName(user.getName());
-}
-```
+**💡 建议**: 移除未使用的 import 语句。
 
 ---
 
-### 代码风格 (3)
-
-#### 🟢 缺少 Javadoc 注释
-
-**文件**: `src/main/java/com/example/ProductService.java` L15  
-**类别**: 代码风格
-
-**描述**:
-
-公共方法缺少 Javadoc 注释，影响代码可维护性和可读性。建议添加注释说明方法功能、参数、返回值。
-
----
-
-#### 🟢 变量命名不够清晰
-
-**文件**: `src/main/java/com/example/Utils.java` L8  
-**类别**: 代码风格
-
-**描述**:
-
-变量名 'a' 不具有描述性，建议使用有意义的名称，提高代码可读性。
-
-**代码片段**:
-
-```
-int a = calculate();
-```
-
----
-
-#### 🟢 使用魔法数字
-
-**文件**: `src/main/java/com/example/Config.java` L10  
-**类别**: 代码风格
-
-**描述**:
-
-代码中使用了魔法数字 30，建议定义为常量并添加注释说明含义。
-
-**代码片段**:
-
-```
-int timeout = 30;
-```
-
----
-
----
-
-## 总体摘要
-
-本次审查共发现 7 个问题，包括 1 个严重级别问题、2 个高级别问题、1 个中级别问题和 3 个低级别问题。建议优先修复严重和高级别的问题，特别是 SQL 注入漏洞和硬编码的 API Key，这些问题可能带来严重的安全风险。对于中低级别的问题，可以在后续迭代中逐步改进。
+*(为避免过长，仅展示部分问题示例)*
 
 ---
 
@@ -495,33 +320,30 @@ int timeout = 30;
 
 | 🔴 严重 | 🟠 高 | 🟡 中 | 🟢 低 | 总计 |
 |---------|-------|-------|-------|------|
-| 1 | 2 | 1 | 3 | 7 |
+| 12 | 14 | 7 | 5 | 38 |
 
 ⚠️ **发现严重问题，建议先修复再合并**
 
 <details>
 <summary>查看详细报告</summary>
 
-### 🔴 Critical
-- **SQL 注入漏洞** [src/main/java/com/example/UserController.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/UserController.java#L45)
+### 🔴 Critical (12)
+- **硬编码数据库密码** [Main.java:6](https://github.com/CoderXuRui/java-bug-demo/blob/HEAD/java-bug-demo/src/main/java/com/buggy/app/Main.java#L6)
+- **硬编码API密钥** [Main.java:7](https://github.com/CoderXuRui/java-bug-demo/blob/HEAD/java-bug-demo/src/main/java/com/buggy/app/Main.java#L7)
+- **在控制台打印敏感信息** [Main.java:11](https://github.com/CoderXuRui/java-bug-demo/blob/HEAD/java-bug-demo/src/main/java/com/buggy/app/Main.java#L11)
+- ...
 
-### 🟠 High
-- **硬编码的 API Key** [src/main/java/com/example/ApiService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/ApiService.java#L12)
-- **空指针异常风险** [src/main/java/com/example/UserService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/UserService.java#L23)
-
-### 🟡 Medium
-- **性能问题 - 循环内查询数据库** [src/main/java/com/example/OrderService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/OrderService.java#L30)
-
-### 🟢 Low
-- **缺少 Javadoc 注释** [src/main/java/com/example/ProductService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/ProductService.java#L15)
-- **变量命名不够清晰** [src/main/java/com/example/Utils.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/Utils.java#L8)
-- **使用魔法数字** [src/main/java/com/example/Config.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/Config.java#L10)
+### 🟠 High (14)
+- **数组越界风险** [Main.java:22](https://github.com/CoderXuRui/java-bug-demo/blob/HEAD/java-bug-demo/src/main/java/com/buggy/app/Main.java#L22)
+- **除零异常** [Main.java:25](https://github.com/CoderXuRui/java-bug-demo/blob/HEAD/java-bug-demo/src/main/java/com/buggy/app/Main.java#L25)
+- **空指针传递可能导致崩溃** [Main.java:28](https://github.com/CoderXuRui/java-bug-demo/blob/HEAD/java-bug-demo/src/main/java/com/buggy/app/Main.java#L28)
+- ...
 
 ---
 
-## 摘要
+## 审查摘要
 
-本次审查共发现 7 个问题，包括 1 个严重级别问题、2 个高级别问题、1 个中级别问题和 3 个低级别问题。建议优先修复严重和高级别的问题，特别是 SQL 注入漏洞和硬编码的 API Key，这些问题可能带来严重的安全风险。
+本次审查共发现 38 个问题，包括 12 个严重级别问题、14 个高级别问题、7 个中级别问题和 5 个低级别问题。建议优先修复严重和高级别的问题，特别是安全相关的问题。
 
 </details>
 
