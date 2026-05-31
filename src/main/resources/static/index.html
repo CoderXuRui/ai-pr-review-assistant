@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PR Review Assistant</title>
+    <title>AI PR 审查助手</title>
     <style>
         * {
             margin: 0;
@@ -451,73 +451,73 @@
         <div class="header-content">
             <div class="header-logo">
                 <span>🤖</span>
-                <span>AI PR Review Assistant</span>
+                <span>AI PR 审查助手</span>
             </div>
         </div>
     </header>
 
     <div class="container">
         <div class="tabs">
-            <button class="tab active" onclick="showTab('review')">Review PR</button>
-            <button class="tab" onclick="showTab('config')">Config</button>
-            <button class="tab" onclick="showTab('commands')">Commands</button>
+            <button class="tab active" onclick="showTab('review')">📋 审查 PR</button>
+            <button class="tab" onclick="showTab('config')">⚙️ 配置</button>
+            <button class="tab" onclick="showTab('commands')">📝 命令参考</button>
         </div>
 
         <!-- Review Tab -->
         <div id="reviewTab" class="card show">
-            <h2 class="card-title">Review a Pull Request</h2>
+            <h2 class="card-title">开始审查 Pull Request</h2>
             <div class="form-group">
-                <label class="form-label">Repository</label>
+                <label class="form-label">仓库信息</label>
                 <div class="repo-inputs">
-                    <input type="text" class="form-input" id="repoOwner" placeholder="owner" value="CoderXuRui">
+                    <input type="text" class="form-input" id="repoOwner" placeholder="仓库所有者" value="CoderXuRui">
                     <span>/</span>
-                    <input type="text" class="form-input" id="repoName" placeholder="repo" value="pr-test">
+                    <input type="text" class="form-input" id="repoName" placeholder="仓库名称" value="pr-test">
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Pull Request Number</label>
-                <input type="number" class="form-input" id="prNumber" placeholder="123" value="1">
+                <label class="form-label">PR 编号</label>
+                <input type="number" class="form-input" id="prNumber" placeholder="例如: 123" value="1">
             </div>
             <div class="checkbox-group">
                 <input type="checkbox" id="postComment">
-                <label for="postComment">Post review comment to PR</label>
+                <label for="postComment">审查后自动发布评论到 PR</label>
             </div>
             <div class="checkbox-group">
                 <input type="checkbox" id="runAiReview" checked>
-                <label for="runAiReview">Run AI review</label>
+                <label for="runAiReview">运行 AI 代码审查</label>
             </div>
-            <button class="btn btn-primary" id="reviewBtn" onclick="startReview()">Start Review</button>
+            <button class="btn btn-primary" id="reviewBtn" onclick="startReview()">🚀 开始审查</button>
         </div>
 
         <!-- Config Tab -->
         <div id="configTab" class="card">
-            <h2 class="card-title">Configuration</h2>
+            <h2 class="card-title">当前配置</h2>
             <div id="configDisplay"></div>
-            <button class="btn" onclick="loadConfig()" style="margin-top: 16px;">Refresh</button>
+            <button class="btn" onclick="loadConfig()" style="margin-top: 16px;">🔄 刷新配置</button>
         </div>
 
         <!-- Commands Tab -->
         <div id="commandsTab" class="card">
-            <h2 class="card-title">Command Reference</h2>
+            <h2 class="card-title">命令行使用参考</h2>
             <div class="command-list">
                 <div class="command-item">
-                    <div class="label">View Help</div>
+                    <div class="label">查看帮助信息</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">View Config</div>
+                    <div class="label">查看当前配置</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config show</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">Review PR (No Comment)</div>
+                    <div class="label">审查 PR（不发布评论）</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">Review and Post Comment</div>
+                    <div class="label">审查并发布评论</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">Save Report to File</div>
+                    <div class="label">保存报告到文件</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --output report.md</div>
                 </div>
             </div>
@@ -528,7 +528,7 @@
 
         <!-- Results -->
         <div id="results" class="results card">
-            <h2 class="card-title">Review Results</h2>
+            <h2 class="card-title">📊 审查结果</h2>
             <div id="prInfo"></div>
             <div id="summary"></div>
             <div id="findings"></div>
@@ -557,7 +557,7 @@
                 .replace(/>/g, '&gt;')
                 .replace(/^### (.*$)/gim, '<h3>$1</h3>')
                 .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h3>')
                 .replace(/^---+$/gim, '<hr>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
@@ -597,19 +597,19 @@
                 displayConfig(data);
             } catch (e) {
                 document.getElementById('configDisplay').innerHTML =
-                    '<div class="status error">Cannot connect to server: ' + e.message + '</div>';
+                    '<div class="status error">无法连接到服务器: ' + e.message + '</div>';
             }
         }
 
         function displayConfig(config) {
             const html = '<div class="config-grid">' +
-                '<div class="config-item"><div class="config-key">AI Provider</div><div class="config-value">' + (config.aiProvider || 'N/A') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">Model</div><div class="config-value">' + (config.model || 'N/A') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">Base URL</div><div class="config-value">' + (config.baseUrl || 'Default') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">GitHub API</div><div class="config-value">' + (config.githubApiUrl || 'Default') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">Post Comment</div><div class="config-value">' + (config.postComment ? '✅ Enabled' : '❌ Disabled') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">Set Status</div><div class="config-value">' + (config.setStatusCheck ? '✅ Enabled' : '❌ Disabled') + '</div></div>' +
-                '<div class="config-item"><div class="config-key">Max File Size</div><div class="config-value">' + (config.maxFileSizeKB || 'N/A') + ' KB</div></div>' +
+                '<div class="config-item"><div class="config-key">AI 提供商</div><div class="config-value">' + (config.aiProvider || 'N/A') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">模型</div><div class="config-value">' + (config.model || 'N/A') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">Base URL</div><div class="config-value">' + (config.baseUrl || '默认') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">GitHub API</div><div class="config-value">' + (config.githubApiUrl || '默认') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">发布评论</div><div class="config-value">' + (config.postComment ? '✅ 开启' : '❌ 关闭') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">设置状态</div><div class="config-value">' + (config.setStatusCheck ? '✅ 开启' : '❌ 关闭') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">最大文件大小</div><div class="config-value">' + (config.maxFileSizeKB || 'N/A') + ' KB</div></div>' +
                 '</div>';
             document.getElementById('configDisplay').innerHTML = html;
         }
@@ -622,15 +622,15 @@
             const runAiReview = document.getElementById('runAiReview').checked;
 
             if (!repoOwner || !repoName || !prNumber) {
-                showStatus('error', 'Please fill in repository and PR number');
+                showStatus('error', '请填写仓库信息和 PR 编号！');
                 return;
             }
 
             const btn = document.getElementById('reviewBtn');
             btn.disabled = true;
-            btn.textContent = 'Reviewing...';
+            btn.textContent = '⏳ 正在审查...';
 
-            showStatus('loading', 'Connecting to GitHub...');
+            showStatus('loading', '正在连接 GitHub 并获取 PR 信息...');
             document.getElementById('results').classList.remove('show');
 
             try {
@@ -643,17 +643,17 @@
                 const result = await response.json();
 
                 if (result.status === 'error') {
-                    showStatus('error', 'Error: ' + result.error);
+                    showStatus('error', '审查失败: ' + result.error);
                 } else {
-                    showStatus('success', 'Review completed!');
+                    showStatus('success', '🎉 审查完成！');
                     showResults(result);
                 }
             } catch (e) {
-                showStatus('error', 'Request failed: ' + e.message);
+                showStatus('error', '请求失败: ' + e.message);
             }
 
             btn.disabled = false;
-            btn.textContent = 'Start Review';
+            btn.textContent = '🚀 开始审查';
         }
 
         function showStatus(type, message) {
@@ -666,10 +666,10 @@
             document.getElementById('results').classList.add('show');
 
             let prInfoHtml = '<div class="pr-info">';
-            prInfoHtml += '<div class="pr-info-row"><strong>Title:</strong> ' + (result.prTitle || 'N/A') + '</div>';
-            prInfoHtml += '<div class="pr-info-row"><strong>Author:</strong> ' + (result.prAuthor || 'N/A') + '</div>';
+            prInfoHtml += '<div class="pr-info-row"><strong>标题:</strong> ' + (result.prTitle || '无') + '</div>';
+            prInfoHtml += '<div class="pr-info-row"><strong>作者:</strong> ' + (result.prAuthor || '无') + '</div>';
             if (result.prBody) {
-                prInfoHtml += '<div class="pr-info-row"><strong>Description:</strong> ' +
+                prInfoHtml += '<div class="pr-info-row"><strong>描述:</strong> ' +
                     (result.prBody.length > 100 ? result.prBody.substring(0, 100) + '...' : result.prBody) + '</div>';
             }
             prInfoHtml += '</div>';
@@ -683,29 +683,29 @@
             fileListHtml += '</div>';
 
             document.getElementById('prInfo').innerHTML = prInfoHtml +
-                '<p style="margin-top: 12px; font-size: 14px;"><strong>Changed files:</strong> ' + (result.fileCount || 0) + '</p>' +
+                '<p style="margin-top: 12px; font-size: 14px;"><strong>变更文件数:</strong> ' + (result.fileCount || 0) + ' 个</p>' +
                 fileListHtml;
 
             if (result.aiReview === 'complete') {
                 let summaryHtml = '<div class="summary-grid">' +
-                    '<div class="summary-item"><div class="summary-number">' + (result.totalIssues || 0) + '</div><div class="summary-label">Issues</div></div>' +
-                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.CRITICAL || 0) + '</div><div class="summary-label">Critical</div></div>' +
-                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.HIGH || 0) + '</div><div class="summary-label">High</div></div>' +
-                    '<div class="summary-item"><div class="summary-number">' + ((result.reviewDuration / 1000).toFixed(1)) + 's</div><div class="summary-label">Duration</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.totalIssues || 0) + '</div><div class="summary-label">问题总数</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.CRITICAL || 0) + '</div><div class="summary-label">严重问题</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.HIGH || 0) + '</div><div class="summary-label">高优先级</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + ((result.reviewDuration / 1000).toFixed(1)) + 's</div><div class="summary-label">耗时</div></div>' +
                     '</div>';
 
                 if (result.commentPosted) {
-                    summaryHtml += '<div class="status success">Comment posted to PR</div>';
+                    summaryHtml += '<div class="status success">✅ 评论已成功发布到 PR！</div>';
                 }
 
                 if (result.reviewSummary) {
-                    summaryHtml += '<div class="summary-section-title">Review Summary</div>';
+                    summaryHtml += '<div class="summary-section-title">📝 审查摘要</div>';
                     summaryHtml += '<div class="summary-markdown">' + renderMarkdownAdvanced(result.reviewSummary) + '</div>';
                 }
 
                 document.getElementById('summary').innerHTML = summaryHtml;
 
-                let findingsHtml = '<div class="summary-section-title">Findings</div>';
+                let findingsHtml = '<div class="summary-section-title">🔍 发现的问题</div>';
                 if (result.findings && result.findings.length > 0) {
                     result.findings.forEach(finding => {
                         const severityClass = finding.severity === 'CRITICAL' ? 'critical' :
@@ -714,21 +714,21 @@
                         findingsHtml +=
                             '<div class="finding ' + severityClass + '">' +
                             '<div class="finding-header">' +
-                            '<span class="finding-title">' + (finding.title || 'N/A') + '</span>' +
+                            '<span class="finding-title">' + (finding.title || '无标题') + '</span>' +
                             '<span class="' + badgeClass + '">' + (finding.category || 'N/A') + '</span>' +
                             '</div>' +
-                            '<div style="margin-bottom: 8px; font-size: 13px;"><strong>File:</strong> ' +
-                            (finding.fileName || 'N/A') + (finding.lineNumber ? ' (Line ' + finding.lineNumber + ')' : '') + '</div>' +
+                            '<div style="margin-bottom: 8px; font-size: 13px;"><strong>文件:</strong> ' +
+                            (finding.fileName || 'N/A') + (finding.lineNumber ? ' (第 ' + finding.lineNumber + ' 行)' : '') + '</div>' +
                             '<div style="margin-bottom: 8px; font-size: 14px;">' + (finding.description || '') + '</div>' +
-                            (finding.suggestion ? '<div style="font-size: 14px;"><strong>Advice:</strong> ' + finding.suggestion + '</div>' : '') +
+                            (finding.suggestion ? '<div style="font-size: 14px;"><strong>💡 建议:</strong> ' + finding.suggestion + '</div>' : '') +
                             '</div>';
                     });
                 } else {
-                    findingsHtml += '<p>✨ No issues found!</p>';
+                    findingsHtml += '<p>✨ 太棒了！没有发现任何问题！</p>';
                 }
                 document.getElementById('findings').innerHTML = findingsHtml;
             } else {
-                document.getElementById('summary').innerHTML = '<p>AI review skipped.</p>';
+                document.getElementById('summary').innerHTML = '<p>已跳过 AI 审查。</p>';
                 document.getElementById('findings').innerHTML = '';
             }
         }
@@ -737,9 +737,9 @@
         async function checkHealth() {
             try {
                 const res = await fetch('/api/health');
-                console.log('Backend ready');
+                console.log('后端服务就绪');
             } catch (e) {
-                console.log('Backend not ready');
+                console.log('后端服务未就绪');
             }
         }
     </script>
