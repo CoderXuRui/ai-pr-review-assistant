@@ -29,7 +29,7 @@
 
 ## Demo 视频
 
-🎬 **[点击查看 Demo 视频](https://www.bilibili.com/video/your-video-id)**
+🎬 **[点击查看 Demo 视频](https://www.bilibili.com/video/BV1WpVS6mEk8/?vd_source=7e47b8846825fcb619e8f11615729e98)**
 
 （视频包含完整流程演示：拉取 PR → AI 审查 → 生成结果 → 发布评论）
 
@@ -170,172 +170,360 @@ java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review --help
 
 ---
 
-# AI PR 代码审查报告
+<!-- AI PR Review Assistant -->
+
+# AI PR 审查报告
 
 **仓库**: CoderXuRui/pr-test  
-**PR**: #2 - 测试PR2  
-**审查时间**: 2026-05-31  
-**审查范围**: 2 个文件
+**PR #2**: 测试PR2 - 添加新功能  
+**审查耗时**: 8.3 秒  
 
----
+## 审查摘要
 
-## 📊 审查概览
-
-| 严重程度 | 问题数量 |
-|---------|---------|
+| 严重程度 | 数量 |
+|----------|------|
 | 🔴 Critical | 1 |
 | 🟠 High | 2 |
 | 🟡 Medium | 1 |
 | 🟢 Low | 3 |
 
----
+**总计**: 7 个问题  
 
-## 🔴 Critical 问题
+⚠️ **注意**: 发现严重级别问题！
 
-### 1. SQL 注入漏洞
-**文件**: `src/main/java/com/example/UserController.java`  
-**行号**: 45-48
+## 按严重程度分类
 
-**问题代码**:
-```java
+### 🔴 Critical (1)
+
+#### 🔴 SQL 注入漏洞
+
+**文件**: `src/main/java/com/example/UserController.java` L45  
+**类别**: 安全问题
+
+**描述**:
+
+直接拼接 SQL 语句，存在 SQL 注入漏洞。攻击者可以通过构造恶意的 userName 参数来执行任意 SQL。
+
+**建议**:
+
+使用 PreparedStatement 代替 Statement，参数化查询。
+
+**代码片段**:
+
+```
 String sql = "SELECT * FROM users WHERE name = '" + userName + "'";
 ResultSet rs = statement.executeQuery(sql);
 ```
 
-**问题描述**: 直接拼接 SQL 语句，存在 SQL 注入漏洞。攻击者可以通过构造恶意的 userName 参数来执行任意 SQL。
-
-**改进建议**:
-```java
-String sql = "SELECT * FROM users WHERE name = ?";
-PreparedStatement pstmt = connection.prepareStatement(sql);
-pstmt.setString(1, userName);
-ResultSet rs = pstmt.executeQuery();
-```
-
 ---
 
-## 🟠 High 问题
+### 🟠 High (2)
 
-### 1. 硬编码的 API Key
-**文件**: `src/main/java/com/example/ApiService.java`  
-**行号**: 12
+#### 🟠 硬编码的 API Key
 
-**问题代码**:
-```java
+**文件**: `src/main/java/com/example/ApiService.java` L12  
+**类别**: 安全问题
+
+**描述**:
+
+API Key 直接硬编码在代码中，存在严重的安全风险。如果代码泄露，攻击者可以使用这个 Key。
+
+**建议**:
+
+将 API Key 存储在环境变量或配置文件中，不要提交到代码仓库。
+
+**代码片段**:
+
+```
 private static final String API_KEY = "sk-1234567890abcdef";
 ```
 
-**问题描述**: API Key 直接硬编码在代码中，存在严重的安全风险。如果代码泄露，攻击者可以使用这个 Key。
+---
 
-**改进建议**:
-```java
-private static final String API_KEY = System.getenv("API_KEY");
+#### 🟠 空指针异常风险
+
+**文件**: `src/main/java/com/example/UserService.java` L23  
+**类别**: Bug
+
+**描述**:
+
+user 对象可能为 null，直接调用 getName() 会导致 NullPointerException。建议在使用前进行空值检查。
+
+**建议**:
+
+添加空值检查或使用 Optional。
+
+**代码片段**:
+
 ```
-
-### 2. 空指针异常风险
-**文件**: `src/main/java/com/example/UserService.java`  
-**行号**: 23
-
-**问题代码**:
-```java
 return user.getName().toUpperCase();
-```
-
-**问题描述**: `user` 对象可能为 null，直接调用 `getName()` 会导致 NullPointerException。
-
-**改进建议**:
-```java
-return user != null && user.getName() != null ? user.getName().toUpperCase() : "";
 ```
 
 ---
 
-## 🟡 Medium 问题
+### 🟡 Medium (1)
 
-### 1. 性能问题 - 循环内查询数据库
-**文件**: `src/main/java/com/example/OrderService.java`  
-**行号**: 30-35
+#### 🟡 性能问题 - 循环内查询数据库
 
-**问题代码**:
-```java
+**文件**: `src/main/java/com/example/OrderService.java` L30  
+**类别**: 性能问题
+
+**描述**:
+
+在循环中每次都查询数据库，会导致 N+1 查询问题，性能较差。建议批量查询。
+
+**建议**:
+
+先批量查询所有需要的用户，再在内存中匹配。
+
+**代码片段**:
+
+```
 for (Order order : orders) {
-    User user = userDao.findById(order.getUserId());  // N+1 查询问题
+    User user = userDao.findById(order.getUserId());
     order.setUserName(user.getName());
 }
 ```
 
-**问题描述**: 在循环中每次都查询数据库，会导致 N+1 查询问题，性能较差。
+---
 
-**改进建议**:
-```java
-Set<Long> userIds = orders.stream().map(Order::getUserId).collect(Collectors.toSet());
-Map<Long, User> userMap = userDao.findByIds(userIds).stream()
-    .collect(Collectors.toMap(User::getId, Function.identity()));
+### 🟢 Low (3)
+
+#### 🟢 缺少 Javadoc 注释
+
+**文件**: `src/main/java/com/example/ProductService.java` L15  
+**类别**: 代码风格
+
+**描述**:
+
+公共方法缺少 Javadoc 注释，影响代码可维护性和可读性。建议添加注释说明方法功能、参数、返回值。
+
+---
+
+#### 🟢 变量命名不够清晰
+
+**文件**: `src/main/java/com/example/Utils.java` L8  
+**类别**: 代码风格
+
+**描述**:
+
+变量名 'a' 不具有描述性，建议使用有意义的名称，提高代码可读性。
+
+**代码片段**:
+
+```
+int a = calculate();
+```
+
+---
+
+#### 🟢 使用魔法数字
+
+**文件**: `src/main/java/com/example/Config.java` L10  
+**类别**: 代码风格
+
+**描述**:
+
+代码中使用了魔法数字 30，建议定义为常量并添加注释说明含义。
+
+**代码片段**:
+
+```
+int timeout = 30;
+```
+
+---
+
+## 按类别分类
+
+### Bug (1)
+
+#### 🟠 空指针异常风险
+
+**文件**: `src/main/java/com/example/UserService.java` L23  
+**类别**: Bug
+
+**描述**:
+
+user 对象可能为 null，直接调用 getName() 会导致 NullPointerException。建议在使用前进行空值检查。
+
+**建议**:
+
+添加空值检查或使用 Optional。
+
+**代码片段**:
+
+```
+return user.getName().toUpperCase();
+```
+
+---
+
+### 安全问题 (2)
+
+#### 🔴 SQL 注入漏洞
+
+**文件**: `src/main/java/com/example/UserController.java` L45  
+**类别**: 安全问题
+
+**描述**:
+
+直接拼接 SQL 语句，存在 SQL 注入漏洞。攻击者可以通过构造恶意的 userName 参数来执行任意 SQL。
+
+**建议**:
+
+使用 PreparedStatement 代替 Statement，参数化查询。
+
+**代码片段**:
+
+```
+String sql = "SELECT * FROM users WHERE name = '" + userName + "'";
+ResultSet rs = statement.executeQuery(sql);
+```
+
+---
+
+#### 🟠 硬编码的 API Key
+
+**文件**: `src/main/java/com/example/ApiService.java` L12  
+**类别**: 安全问题
+
+**描述**:
+
+API Key 直接硬编码在代码中，存在严重的安全风险。如果代码泄露，攻击者可以使用这个 Key。
+
+**建议**:
+
+将 API Key 存储在环境变量或配置文件中，不要提交到代码仓库。
+
+**代码片段**:
+
+```
+private static final String API_KEY = "sk-1234567890abcdef";
+```
+
+---
+
+### 性能问题 (1)
+
+#### 🟡 性能问题 - 循环内查询数据库
+
+**文件**: `src/main/java/com/example/OrderService.java` L30  
+**类别**: 性能问题
+
+**描述**:
+
+在循环中每次都查询数据库，会导致 N+1 查询问题，性能较差。建议批量查询。
+
+**建议**:
+
+先批量查询所有需要的用户，再在内存中匹配。
+
+**代码片段**:
+
+```
 for (Order order : orders) {
-    order.setUserName(userMap.get(order.getUserId()).getName());
+    User user = userDao.findById(order.getUserId());
+    order.setUserName(user.getName());
 }
 ```
 
 ---
 
-## 🟢 Low 问题
+### 代码风格 (3)
 
-### 1. 代码风格 - 缺少注释
-**文件**: `src/main/java/com/example/ProductService.java`  
-**行号**: 15-20
+#### 🟢 缺少 Javadoc 注释
 
-**问题描述**: 公共方法缺少 Javadoc 注释，影响代码可维护性。
+**文件**: `src/main/java/com/example/ProductService.java` L15  
+**类别**: 代码风格
 
-**改进建议**: 添加方法注释说明功能、参数、返回值。
+**描述**:
 
-### 2. 代码风格 - 变量命名
-**文件**: `src/main/java/com/example/Utils.java`  
-**行号**: 8
+公共方法缺少 Javadoc 注释，影响代码可维护性和可读性。建议添加注释说明方法功能、参数、返回值。
 
-**问题代码**:
-```java
+---
+
+#### 🟢 变量命名不够清晰
+
+**文件**: `src/main/java/com/example/Utils.java` L8  
+**类别**: 代码风格
+
+**描述**:
+
+变量名 'a' 不具有描述性，建议使用有意义的名称，提高代码可读性。
+
+**代码片段**:
+
+```
 int a = calculate();
 ```
 
-**问题描述**: 变量名 `a` 不具有描述性，建议使用有意义的名称。
+---
 
-**改进建议**:
-```java
-int result = calculate();
+#### 🟢 使用魔法数字
+
+**文件**: `src/main/java/com/example/Config.java` L10  
+**类别**: 代码风格
+
+**描述**:
+
+代码中使用了魔法数字 30，建议定义为常量并添加注释说明含义。
+
+**代码片段**:
+
 ```
-
-### 3. 代码风格 - 魔法数字
-**文件**: `src/main/java/com/example/Config.java`  
-**行号**: 10
-
-**问题代码**:
-```java
 int timeout = 30;
 ```
 
-**问题描述**: 数字 30 是魔法数字，建议定义为常量并添加注释说明含义。
-
-**改进建议**:
-```java
-private static final int DEFAULT_TIMEOUT_SECONDS = 30;
-int timeout = DEFAULT_TIMEOUT_SECONDS;
-```
+---
 
 ---
 
-## 📝 总结
+## 总体摘要
 
-本次审查共发现 **7 个问题**:
-- Critical: 1 个（需立即修复）
-- High: 2 个（建议尽快修复）
-- Medium: 1 个（计划修复）
-- Low: 3 个（逐步改进）
-
-建议优先修复 Critical 和 High 级别的问题，以确保代码安全性和稳定性。
+本次审查共发现 7 个问题，包括 1 个严重级别问题、2 个高级别问题、1 个中级别问题和 3 个低级别问题。建议优先修复严重和高级别的问题，特别是 SQL 注入漏洞和硬编码的 API Key，这些问题可能带来严重的安全风险。对于中低级别的问题，可以在后续迭代中逐步改进。
 
 ---
 
-*由 AI PR Review Assistant 自动生成*
+## 📝 GitHub PR 评论示例
+
+当使用 `--post-comment` 选项时，会在 PR 中发布如下格式的评论：
+
+<!-- AI PR Review Assistant -->
+
+# 🤖 AI PR 审查
+
+| 🔴 严重 | 🟠 高 | 🟡 中 | 🟢 低 | 总计 |
+|---------|-------|-------|-------|------|
+| 1 | 2 | 1 | 3 | 7 |
+
+⚠️ **发现严重问题，建议先修复再合并**
+
+<details>
+<summary>查看详细报告</summary>
+
+### 🔴 Critical
+- **SQL 注入漏洞** [src/main/java/com/example/UserController.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/UserController.java#L45)
+
+### 🟠 High
+- **硬编码的 API Key** [src/main/java/com/example/ApiService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/ApiService.java#L12)
+- **空指针异常风险** [src/main/java/com/example/UserService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/UserService.java#L23)
+
+### 🟡 Medium
+- **性能问题 - 循环内查询数据库** [src/main/java/com/example/OrderService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/OrderService.java#L30)
+
+### 🟢 Low
+- **缺少 Javadoc 注释** [src/main/java/com/example/ProductService.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/ProductService.java#L15)
+- **变量命名不够清晰** [src/main/java/com/example/Utils.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/Utils.java#L8)
+- **使用魔法数字** [src/main/java/com/example/Config.java](https://github.com/CoderXuRui/pr-test/blob/HEAD/src/main/java/com/example/Config.java#L10)
+
+---
+
+## 摘要
+
+本次审查共发现 7 个问题，包括 1 个严重级别问题、2 个高级别问题、1 个中级别问题和 3 个低级别问题。建议优先修复严重和高级别的问题，特别是 SQL 注入漏洞和硬编码的 API Key，这些问题可能带来严重的安全风险。
+
+</details>
 
 ---
 
