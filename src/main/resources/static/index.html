@@ -3,238 +3,532 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI PR Review Assistant - Web UI</title>
+    <title>AI PR Review Assistant</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            background-color: #f6f8fa;
+            color: #1f2328;
+            line-height: 1.5;
         }
-        .container { max-width: 1100px; margin: 0 auto; }
-        h1 { color: white; text-align: center; margin-bottom: 30px; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
 
-        /* 导航标签 */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        /* Header */
+        .header {
+            background-color: #24292f;
+            padding: 16px 24px;
+            border-bottom: 1px solid #d0d7deb3;
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #d0d7de;
+            margin-bottom: 24px;
+        }
+
         .tab {
-            background: rgba(255,255,255,0.2); color: white; border: none;
-            padding: 12px 24px; border-radius: 8px 8px 0 0; cursor: pointer;
-            font-weight: 600; transition: background 0.3s; font-size: 14px;
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            color: #656d76;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color 0.2s;
         }
-        .tab:hover { background: rgba(255,255,255,0.3); }
-        .tab.active { background: white; color: #667eea; }
 
+        .tab:hover {
+            color: #1f2328;
+        }
+
+        .tab.active {
+            color: #1f2328;
+            border-bottom-color: #fd8c73;
+        }
+
+        /* Card */
         .card {
-            background: white; border-radius: 16px; padding: 30px; margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: none;
+            display: none;
+            background-color: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
-        .card.show { display: block; }
-        .card h2 { color: #667eea; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
 
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: #555; }
-        input, textarea, select {
-            width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0;
-            border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
+        .card.show {
+            display: block;
         }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #667eea; }
 
-        .repo-inputs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; }
-        .repo-inputs span { font-size: 24px; color: #667eea; font-weight: bold; padding-bottom: 12px; }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #d0d7de;
+        }
 
+        /* Form elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1f2328;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            background-color: #ffffff;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #0969da;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+        }
+
+        .repo-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .repo-inputs .form-input {
+            flex: 1;
+        }
+
+        .repo-inputs span {
+            color: #656d76;
+            font-weight: 500;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-group label {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Buttons */
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
-            border: none; padding: 14px 30px; border-radius: 8px; font-size: 16px;
-            font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            padding: 6px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-outline { background: transparent; border: 2px solid #667eea; color: #667eea; }
 
-        .status { padding: 15px 20px; border-radius: 8px; margin: 20px 0; display: none; }
-        .status.success { background: #d4edda; color: #155724; display: block; }
-        .status.error { background: #f8d7da; color: #721c24; display: block; }
-        .status.loading { background: #d1ecf1; color: #0c5460; display: block; }
+        .btn-primary {
+            background-color: #1f883d;
+            color: #ffffff;
+            border-color: rgba(240, 246, 252, 0.1);
+        }
 
-        .results { display: none; margin-top: 20px; }
-        .results.show { display: block; }
+        .btn-primary:hover {
+            background-color: #1a7f37;
+        }
 
-        .finding { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #667eea; }
-        .finding.critical { border-left-color: #dc3545; }
-        .finding.high { border-left-color: #ffc107; }
-        .finding-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .finding-title { font-weight: 600; color: #333; }
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-        .badge-bug { background: #f8d7da; color: #721c24; }
-        .badge-security { background: #dc3545; color: white; }
-        .badge-performance { background: #ffc107; color: #333; }
-        .badge-style { background: #667eea; color: white; }
+        .btn-primary:disabled {
+            background-color: #94d3a2;
+            cursor: not-allowed;
+        }
 
-        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
-        .summary-item { text-align: center; padding: 20px; border-radius: 12px; background: #f8f9fa; }
-        .summary-number { font-size: 2.5rem; font-weight: bold; color: #667eea; }
-        .summary-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+        /* Status messages */
+        .status {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: none;
+        }
 
-        .file-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; }
-        .file-tag { background: #e9ecef; padding: 6px 12px; border-radius: 16px; font-size: 13px; color: #495057; }
+        .status.success {
+            display: block;
+            background-color: #dafbe1;
+            border: 1px solid #a3d9b1;
+            color: #1f2328;
+        }
 
-        .config-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
-        .config-item { background: #f8f9fa; padding: 15px; border-radius: 8px; }
-        .config-key { font-weight: 600; color: #667eea; margin-bottom: 5px; font-size: 14px; }
-        .config-value { font-family: monospace; color: #333; font-size: 14px; word-break: break-all; }
+        .status.error {
+            display: block;
+            background-color: #ffebe9;
+            border: 1px solid #f2b4b0;
+            color: #1f2328;
+        }
 
-        .command-list { display: flex; flex-direction: column; gap: 15px; }
-        .command-item { background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 8px; font-family: monospace; }
-        .command-item .label { color: #667eea; margin-bottom: 8px; font-weight: 600; font-family: sans-serif; }
+        .status.loading {
+            display: block;
+            background-color: #ddf4ff;
+            border: 1px solid #93c5f5;
+            color: #1f2328;
+        }
 
-        .checkbox-group { display: flex; gap: 10px; align-items: center; margin: 10px 0; }
-        .checkbox-group input { width: auto; }
+        /* Results */
+        .results {
+            display: none;
+        }
 
-        .pr-info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .pr-info-row { margin: 8px 0; }
+        .results.show {
+            display: block;
+        }
 
-        /* Markdown 摘要样式 */
+        /* PR Info */
+        .pr-info {
+            background-color: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .pr-info-row {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .pr-info-row strong {
+            color: #1f2328;
+        }
+
+        /* File list */
+        .file-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .file-tag {
+            font-size: 12px;
+            padding: 4px 8px;
+            background-color: #ddf4ff;
+            color: #0550ae;
+            border-radius: 12px;
+        }
+
+        /* Summary grid */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .summary-item {
+            background-color: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: #0969da;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #656d76;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* Summary section */
+        .summary-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 24px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #d0d7de;
+        }
+
         .summary-markdown {
-            line-height: 1.8;
-            color: #333;
+            font-size: 14px;
         }
+
         .summary-markdown h1,
         .summary-markdown h2,
         .summary-markdown h3 {
-            color: #667eea;
-            margin-top: 24px;
-            margin-bottom: 12px;
-            font-weight: 700;
+            margin: 16px 0 8px;
+            font-weight: 600;
         }
-        .summary-markdown h1 { font-size: 1.75rem; }
-        .summary-markdown h2 { font-size: 1.4rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
-        .summary-markdown h3 { font-size: 1.2rem; }
+
+        .summary-markdown h1 { font-size: 20px; }
+        .summary-markdown h2 { font-size: 18px; }
+        .summary-markdown h3 { font-size: 16px; }
+
         .summary-markdown p {
-            margin-bottom: 14px;
+            margin-bottom: 8px;
         }
+
         .summary-markdown ul,
         .summary-markdown ol {
             margin-left: 24px;
-            margin-bottom: 14px;
-        }
-        .summary-markdown li {
             margin-bottom: 8px;
         }
+
+        .summary-markdown li {
+            margin-bottom: 4px;
+        }
+
         .summary-markdown strong {
-            color: #764ba2;
             font-weight: 600;
         }
-        .summary-markdown hr {
-            border: none;
-            border-top: 2px dashed #e0e0e0;
-            margin: 24px 0;
-        }
-        .summary-markdown blockquote {
-            border-left: 4px solid #667eea;
-            padding-left: 16px;
-            margin-left: 0;
-            color: #666;
-            background: #f8f9fa;
-            padding: 12px 16px;
-            border-radius: 0 8px 8px 0;
-        }
+
         .summary-markdown code {
-            background: #f0f0f0;
-            padding: 2px 8px;
+            background-color: #f6f8fa;
+            padding: 2px 6px;
             border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.9em;
-            color: #764ba2;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 12px;
         }
-        .summary-section-title {
-            color: #667eea;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-top: 24px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #f0f0f0;
+
+        /* Findings */
+        .finding {
+            background-color: #ffffff;
+            border: 1px solid #d0d7de;
+            border-left: 4px solid #0969da;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .finding.critical {
+            border-left-color: #cf222e;
+            background-color: #ffebe9;
+        }
+
+        .finding.high {
+            border-left-color: #9a6700;
+            background-color: #fff8c5;
+        }
+
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .finding-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .badge-bug { background-color: #ffebe9; color: #cf222e; }
+        .badge-security { background-color: #ffebe9; color: #cf222e; }
+        .badge-performance { background-color: #fff8c5; color: #9a6700; }
+        .badge-style { background-color: #ddf4ff; color: #0550ae; }
+
+        /* Commands */
+        .command-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .command-item {
+            background-color: #161b22;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .command-item .label {
+            color: #7d8590;
+            font-size: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .command-item div:last-child {
+            color: #e6edf3;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        /* Config grid */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .config-item {
+            background-color: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .config-key {
+            font-size: 12px;
+            font-weight: 600;
+            color: #656d76;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .config-value {
+            font-size: 14px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            color: #1f2328;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🤖 AI PR Review Assistant</h1>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <span>🤖</span>
+                <span>AI PR Review Assistant</span>
+            </div>
+        </div>
+    </header>
 
-        <!-- 导航标签 -->
+    <div class="container">
         <div class="tabs">
-            <button class="tab active" onclick="showTab('review')">📋 审查PR</button>
-            <button class="tab" onclick="showTab('config')">⚙️ 配置管理</button>
-            <button class="tab" onclick="showTab('commands')">📎 命令参考</button>
+            <button class="tab active" onclick="showTab('review')">Review PR</button>
+            <button class="tab" onclick="showTab('config')">Config</button>
+            <button class="tab" onclick="showTab('commands')">Commands</button>
         </div>
 
-        <!-- 审查PR页面 -->
+        <!-- Review Tab -->
         <div id="reviewTab" class="card show">
-            <h2>📋 开始审查</h2>
+            <h2 class="card-title">Review a Pull Request</h2>
             <div class="form-group">
-                <label>仓库信息</label>
+                <label class="form-label">Repository</label>
                 <div class="repo-inputs">
-                    <input type="text" id="repoOwner" placeholder="owner" value="CoderXuRui">
+                    <input type="text" class="form-input" id="repoOwner" placeholder="owner" value="CoderXuRui">
                     <span>/</span>
-                    <input type="text" id="repoName" placeholder="repo" value="pr-test">
+                    <input type="text" class="form-input" id="repoName" placeholder="repo" value="pr-test">
                 </div>
             </div>
             <div class="form-group">
-                <label>PR 编号</label>
-                <input type="number" id="prNumber" placeholder="123" value="1">
+                <label class="form-label">Pull Request Number</label>
+                <input type="number" class="form-input" id="prNumber" placeholder="123" value="1">
             </div>
             <div class="checkbox-group">
                 <input type="checkbox" id="postComment">
-                <label for="postComment" style="margin-bottom: 0;">审查后发布评论到PR</label>
+                <label for="postComment">Post review comment to PR</label>
             </div>
             <div class="checkbox-group">
                 <input type="checkbox" id="runAiReview" checked>
-                <label for="runAiReview" style="margin-bottom: 0;">运行AI审查</label>
+                <label for="runAiReview">Run AI review</label>
             </div>
-            <button class="btn" id="reviewBtn" onclick="startReview()">🚀 开始审查</button>
+            <button class="btn btn-primary" id="reviewBtn" onclick="startReview()">Start Review</button>
         </div>
 
-        <!-- 配置管理页面 -->
+        <!-- Config Tab -->
         <div id="configTab" class="card">
-            <h2>⚙️ 配置管理</h2>
+            <h2 class="card-title">Configuration</h2>
             <div id="configDisplay"></div>
-            <button class="btn btn-outline" onclick="loadConfig()">🔄 刷新配置</button>
+            <button class="btn" onclick="loadConfig()" style="margin-top: 16px;">Refresh</button>
         </div>
 
-        <!-- 命令参考页面 -->
+        <!-- Commands Tab -->
         <div id="commandsTab" class="card">
-            <h2>📎 命令参考</h2>
+            <h2 class="card-title">Command Reference</h2>
             <div class="command-list">
                 <div class="command-item">
-                    <div class="label">查看帮助</div>
+                    <div class="label">View Help</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">查看配置</div>
+                    <div class="label">View Config</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config show</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">审查PR（不发布评论）</div>
+                    <div class="label">Review PR (No Comment)</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">审查并发布评论</div>
+                    <div class="label">Review and Post Comment</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --post-comment</div>
                 </div>
                 <div class="command-item">
-                    <div class="label">保存报告到文件</div>
+                    <div class="label">Save Report to File</div>
                     <div>java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123 --output report.md</div>
                 </div>
             </div>
         </div>
 
-        <!-- 状态显示 -->
+        <!-- Status -->
         <div id="status" class="status"></div>
 
-        <!-- 结果展示 -->
+        <!-- Results -->
         <div id="results" class="results card">
-            <h2>📊 审查结果</h2>
+            <h2 class="card-title">Review Results</h2>
             <div id="prInfo"></div>
             <div id="summary"></div>
             <div id="findings"></div>
@@ -254,49 +548,19 @@
             }
         }
 
-        // 简单的 Markdown 渲染函数
-        function renderMarkdown(text) {
-            if (!text) return '';
-
-            let html = text
-                // 标题
-                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                // 分隔线
-                .replace(/^---+$/gim, '<hr>')
-                // 粗体
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                // 列表
-                .replace(/^\- (.*$)/gim, '<li>$1</li>')
-                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-                // 段落（需要在其他块级元素之后处理）
-                .replace(/^(?!<[h|u|p])(.*$)/gim, '<p>$1</p>')
-                // 空段落
-                .replace(/<p><\/p>/g, '');
-
-            return html;
-        }
-
-        // 更好的 Markdown 渲染
         function renderMarkdownAdvanced(text) {
             if (!text) return '';
 
             let html = text
-                // 转义 HTML
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                // 标题
                 .replace(/^### (.*$)/gim, '<h3>$1</h3>')
                 .replace(/^## (.*$)/gim, '<h2>$1</h2>')
                 .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                // 分隔线
                 .replace(/^---+$/gim, '<hr>')
-                // 粗体
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-            // 处理列表
             const lines = html.split('\n');
             let inList = false;
             let result = [];
@@ -332,45 +596,21 @@
                 const data = await res.json();
                 displayConfig(data);
             } catch (e) {
-                document.getElementById('configDisplay').innerHTML = `
-                    <div class="status error">无法连接到服务器: ${e.message}</div>
-                `;
+                document.getElementById('configDisplay').innerHTML =
+                    '<div class="status error">Cannot connect to server: ' + e.message + '</div>';
             }
         }
 
         function displayConfig(config) {
-            const html = `
-                <div class="config-grid">
-                    <div class="config-item">
-                        <div class="config-key">AI 提供商</div>
-                        <div class="config-value">${config.aiProvider}</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-key">模型</div>
-                        <div class="config-value">${config.model}</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-key">Base URL</div>
-                        <div class="config-value">${config.baseUrl || '默认'}</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-key">GitHub API</div>
-                        <div class="config-value">${config.githubApiUrl}</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-key">自动发布评论</div>
-                        <div class="config-value">${config.postComment ? '✅ 开启' : '❌ 关闭'}</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-key">设置状态检查</div>
-                        <div class="config-value">${config.setStatusCheck ? '✅ 开启' : '❌ 关闭'}</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-key">最大文件大小</div>
-                        <div class="config-value">${config.maxFileSizeKB} KB</div>
-                    </div>
-                </div>
-            `;
+            const html = '<div class="config-grid">' +
+                '<div class="config-item"><div class="config-key">AI Provider</div><div class="config-value">' + (config.aiProvider || 'N/A') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">Model</div><div class="config-value">' + (config.model || 'N/A') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">Base URL</div><div class="config-value">' + (config.baseUrl || 'Default') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">GitHub API</div><div class="config-value">' + (config.githubApiUrl || 'Default') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">Post Comment</div><div class="config-value">' + (config.postComment ? '✅ Enabled' : '❌ Disabled') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">Set Status</div><div class="config-value">' + (config.setStatusCheck ? '✅ Enabled' : '❌ Disabled') + '</div></div>' +
+                '<div class="config-item"><div class="config-key">Max File Size</div><div class="config-value">' + (config.maxFileSizeKB || 'N/A') + ' KB</div></div>' +
+                '</div>';
             document.getElementById('configDisplay').innerHTML = html;
         }
 
@@ -382,49 +622,38 @@
             const runAiReview = document.getElementById('runAiReview').checked;
 
             if (!repoOwner || !repoName || !prNumber) {
-                showStatus('error', '请填写完整的仓库信息和PR号');
+                showStatus('error', 'Please fill in repository and PR number');
                 return;
             }
 
             const btn = document.getElementById('reviewBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ 审查中...';
+            btn.textContent = 'Reviewing...';
 
-            showStatus('loading', '正在连接GitHub...');
+            showStatus('loading', 'Connecting to GitHub...');
             document.getElementById('results').classList.remove('show');
 
             try {
-                console.log('===== [FRONTEND] Sending request =====');
                 const response = await fetch('/api/review', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        repoOwner, repoName, prNumber: parseInt(prNumber),
-                        postComment, runAiReview
-                    })
+                    body: JSON.stringify({ repoOwner, repoName, prNumber: parseInt(prNumber), postComment, runAiReview })
                 });
 
-                console.log('===== [FRONTEND] Response received =====');
                 const result = await response.json();
-                console.log('Full response:', result);
-                console.log('aiReview:', result.aiReview);
-                console.log('totalIssues:', result.totalIssues);
-                console.log('findings:', result.findings);
-                console.log('findings.length:', result.findings ? result.findings.length : 'undefined');
 
                 if (result.status === 'error') {
-                    showStatus('error', '错误: ' + result.error);
+                    showStatus('error', 'Error: ' + result.error);
                 } else {
-                    showStatus('success', '审查成功！');
+                    showStatus('success', 'Review completed!');
                     showResults(result);
                 }
             } catch (e) {
-                console.error('Request failed:', e);
-                showStatus('error', '请求失败: ' + e.message);
+                showStatus('error', 'Request failed: ' + e.message);
             }
 
             btn.disabled = false;
-            btn.textContent = '🚀 开始审查';
+            btn.textContent = 'Start Review';
         }
 
         function showStatus(type, message) {
@@ -436,107 +665,83 @@
         function showResults(result) {
             document.getElementById('results').classList.add('show');
 
-            let prInfoHtml = `
-                <div class="pr-info">
-                    <div class="pr-info-row"><strong>标题:</strong> ${result.prTitle}</div>
-                    <div class="pr-info-row"><strong>作者:</strong> ${result.prAuthor}</div>
-            `;
-            if (result.prBody && result.prBody.length > 100) {
-                prInfoHtml += `<div class="pr-info-row"><strong>描述:</strong> ${result.prBody.substring(0, 100)}...</div>`;
-            } else if (result.prBody) {
-                prInfoHtml += `<div class="pr-info-row"><strong>描述:</strong> ${result.prBody}</div>`;
+            let prInfoHtml = '<div class="pr-info">';
+            prInfoHtml += '<div class="pr-info-row"><strong>Title:</strong> ' + (result.prTitle || 'N/A') + '</div>';
+            prInfoHtml += '<div class="pr-info-row"><strong>Author:</strong> ' + (result.prAuthor || 'N/A') + '</div>';
+            if (result.prBody) {
+                prInfoHtml += '<div class="pr-info-row"><strong>Description:</strong> ' +
+                    (result.prBody.length > 100 ? result.prBody.substring(0, 100) + '...' : result.prBody) + '</div>';
             }
-            prInfoHtml += `</div>`;
+            prInfoHtml += '</div>';
 
             let fileListHtml = '<div class="file-list">';
             if (result.files && result.files.length > 0) {
                 result.files.forEach(file => {
-                    fileListHtml += `<span class="file-tag">${file.name}</span>`;
+                    fileListHtml += '<span class="file-tag">' + file.name + '</span>';
                 });
             }
-            fileListHtml += `</div>`;
+            fileListHtml += '</div>';
 
-            document.getElementById('prInfo').innerHTML = prInfoHtml + `
-                <p><strong>变更文件:</strong> ${result.fileCount} 个</p>
-            ` + fileListHtml;
+            document.getElementById('prInfo').innerHTML = prInfoHtml +
+                '<p style="margin-top: 12px; font-size: 14px;"><strong>Changed files:</strong> ' + (result.fileCount || 0) + '</p>' +
+                fileListHtml;
 
             if (result.aiReview === 'complete') {
-                let summaryHtml = `
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <div class="summary-number">${result.totalIssues}</div>
-                            <div class="summary-label">总问题数</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-number">${result.severityCount?.CRITICAL || 0}</div>
-                            <div class="summary-label">CRITICAL</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-number">${result.severityCount?.HIGH || 0}</div>
-                            <div class="summary-label">HIGH</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-number">${(result.reviewDuration / 1000).toFixed(1)}s</div>
-                            <div class="summary-label">审查耗时</div>
-                        </div>
-                    </div>
-                `;
+                let summaryHtml = '<div class="summary-grid">' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.totalIssues || 0) + '</div><div class="summary-label">Issues</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.CRITICAL || 0) + '</div><div class="summary-label">Critical</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + (result.severityCount?.HIGH || 0) + '</div><div class="summary-label">High</div></div>' +
+                    '<div class="summary-item"><div class="summary-number">' + ((result.reviewDuration / 1000).toFixed(1)) + 's</div><div class="summary-label">Duration</div></div>' +
+                    '</div>';
 
                 if (result.commentPosted) {
-                    summaryHtml += `<div class="status success">评论已发布到PR</div>`;
+                    summaryHtml += '<div class="status success">Comment posted to PR</div>';
                 }
 
                 if (result.reviewSummary) {
-                    summaryHtml += `<div class="summary-section-title">📝 审查摘要</div>`;
-                    summaryHtml += `<div class="summary-markdown">${renderMarkdownAdvanced(result.reviewSummary)}</div>`;
+                    summaryHtml += '<div class="summary-section-title">Review Summary</div>';
+                    summaryHtml += '<div class="summary-markdown">' + renderMarkdownAdvanced(result.reviewSummary) + '</div>';
                 }
 
                 document.getElementById('summary').innerHTML = summaryHtml;
 
-                let findingsHtml = `<h3 style="margin-top: 20px; margin-bottom: 15px;">🔍 审查发现</h3>`;
+                let findingsHtml = '<div class="summary-section-title">Findings</div>';
                 if (result.findings && result.findings.length > 0) {
                     result.findings.forEach(finding => {
                         const severityClass = finding.severity === 'CRITICAL' ? 'critical' :
-                                            finding.severity === 'HIGH' ? 'high' : '';
+                                              finding.severity === 'HIGH' ? 'high' : '';
                         const badgeClass = 'badge badge-' + finding.category.toLowerCase();
-                        findingsHtml += `
-                            <div class="finding ${severityClass}">
-                                <div class="finding-header">
-                                    <span class="finding-title">${finding.title}</span>
-                                    <span class="${badgeClass}">${finding.category}</span>
-                                </div>
-                                <div style="margin-bottom: 8px;">
-                                    <strong>文件:</strong> ${finding.fileName}
-                                    ${finding.lineNumber ? ` (第${finding.lineNumber}行)` : ''}
-                                </div>
-                                <div style="margin-bottom: 8px;">${finding.description}</div>
-                                ${finding.suggestion ? `<div><strong>建议:</strong> ${finding.suggestion}</div>` : ''}
-                            </div>
-                        `;
+                        findingsHtml +=
+                            '<div class="finding ' + severityClass + '">' +
+                            '<div class="finding-header">' +
+                            '<span class="finding-title">' + (finding.title || 'N/A') + '</span>' +
+                            '<span class="' + badgeClass + '">' + (finding.category || 'N/A') + '</span>' +
+                            '</div>' +
+                            '<div style="margin-bottom: 8px; font-size: 13px;"><strong>File:</strong> ' +
+                            (finding.fileName || 'N/A') + (finding.lineNumber ? ' (Line ' + finding.lineNumber + ')' : '') + '</div>' +
+                            '<div style="margin-bottom: 8px; font-size: 14px;">' + (finding.description || '') + '</div>' +
+                            (finding.suggestion ? '<div style="font-size: 14px;"><strong>Advice:</strong> ' + finding.suggestion + '</div>' : '') +
+                            '</div>';
                     });
                 } else {
-                    findingsHtml += `<p>✨ 没有发现问题！</p>`;
+                    findingsHtml += '<p>✨ No issues found!</p>';
                 }
                 document.getElementById('findings').innerHTML = findingsHtml;
             } else {
-                document.getElementById('summary').innerHTML = `
-                    <p>AI 审查已跳过。</p>
-                `;
+                document.getElementById('summary').innerHTML = '<p>AI review skipped.</p>';
                 document.getElementById('findings').innerHTML = '';
             }
         }
 
+        checkHealth();
         async function checkHealth() {
             try {
                 const res = await fetch('/api/health');
-                const data = await res.json();
-                console.log('Backend status:', data);
+                console.log('Backend ready');
             } catch (e) {
-                console.error('Backend not ready');
+                console.log('Backend not ready');
             }
         }
-
-        checkHealth();
     </script>
 </body>
 </html>
