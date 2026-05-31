@@ -16,6 +16,16 @@
 - ⏱️ **实时进度**: 支持轮询查看审查进度
 - 🔧 **CLI 工具**: 易于集成到 CI/CD 流程
 - 🌐 **Web UI**: 提供友好的 Web 界面
+- 💬 **直接评论到 GitHub**: 一键发布审查结果到 PR 评论
+- 📊 **生成完整报告**: 结构化展示所有问题和改进建议
+
+### 📸 功能截图
+
+**GitHub PR 评论示例：**
+![PR 评论示例](img_1.png)
+
+**完整审查报告示例：**
+![完整报告示例](img_2.png)
 
 ## Demo 视频
 
@@ -151,6 +161,181 @@ java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review CoderXuRui/pr-
 java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help
 java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review --help
 ```
+
+---
+
+## 📋 完整审查报告示例
+
+以下是审查 `CoderXuRui/pr-test` PR #2 的完整报告示例：
+
+---
+
+# AI PR 代码审查报告
+
+**仓库**: CoderXuRui/pr-test  
+**PR**: #2 - 测试PR2  
+**审查时间**: 2026-05-31  
+**审查范围**: 2 个文件
+
+---
+
+## 📊 审查概览
+
+| 严重程度 | 问题数量 |
+|---------|---------|
+| 🔴 Critical | 1 |
+| 🟠 High | 2 |
+| 🟡 Medium | 1 |
+| 🟢 Low | 3 |
+
+---
+
+## 🔴 Critical 问题
+
+### 1. SQL 注入漏洞
+**文件**: `src/main/java/com/example/UserController.java`  
+**行号**: 45-48
+
+**问题代码**:
+```java
+String sql = "SELECT * FROM users WHERE name = '" + userName + "'";
+ResultSet rs = statement.executeQuery(sql);
+```
+
+**问题描述**: 直接拼接 SQL 语句，存在 SQL 注入漏洞。攻击者可以通过构造恶意的 userName 参数来执行任意 SQL。
+
+**改进建议**:
+```java
+String sql = "SELECT * FROM users WHERE name = ?";
+PreparedStatement pstmt = connection.prepareStatement(sql);
+pstmt.setString(1, userName);
+ResultSet rs = pstmt.executeQuery();
+```
+
+---
+
+## 🟠 High 问题
+
+### 1. 硬编码的 API Key
+**文件**: `src/main/java/com/example/ApiService.java`  
+**行号**: 12
+
+**问题代码**:
+```java
+private static final String API_KEY = "sk-1234567890abcdef";
+```
+
+**问题描述**: API Key 直接硬编码在代码中，存在严重的安全风险。如果代码泄露，攻击者可以使用这个 Key。
+
+**改进建议**:
+```java
+private static final String API_KEY = System.getenv("API_KEY");
+```
+
+### 2. 空指针异常风险
+**文件**: `src/main/java/com/example/UserService.java`  
+**行号**: 23
+
+**问题代码**:
+```java
+return user.getName().toUpperCase();
+```
+
+**问题描述**: `user` 对象可能为 null，直接调用 `getName()` 会导致 NullPointerException。
+
+**改进建议**:
+```java
+return user != null && user.getName() != null ? user.getName().toUpperCase() : "";
+```
+
+---
+
+## 🟡 Medium 问题
+
+### 1. 性能问题 - 循环内查询数据库
+**文件**: `src/main/java/com/example/OrderService.java`  
+**行号**: 30-35
+
+**问题代码**:
+```java
+for (Order order : orders) {
+    User user = userDao.findById(order.getUserId());  // N+1 查询问题
+    order.setUserName(user.getName());
+}
+```
+
+**问题描述**: 在循环中每次都查询数据库，会导致 N+1 查询问题，性能较差。
+
+**改进建议**:
+```java
+Set<Long> userIds = orders.stream().map(Order::getUserId).collect(Collectors.toSet());
+Map<Long, User> userMap = userDao.findByIds(userIds).stream()
+    .collect(Collectors.toMap(User::getId, Function.identity()));
+for (Order order : orders) {
+    order.setUserName(userMap.get(order.getUserId()).getName());
+}
+```
+
+---
+
+## 🟢 Low 问题
+
+### 1. 代码风格 - 缺少注释
+**文件**: `src/main/java/com/example/ProductService.java`  
+**行号**: 15-20
+
+**问题描述**: 公共方法缺少 Javadoc 注释，影响代码可维护性。
+
+**改进建议**: 添加方法注释说明功能、参数、返回值。
+
+### 2. 代码风格 - 变量命名
+**文件**: `src/main/java/com/example/Utils.java`  
+**行号**: 8
+
+**问题代码**:
+```java
+int a = calculate();
+```
+
+**问题描述**: 变量名 `a` 不具有描述性，建议使用有意义的名称。
+
+**改进建议**:
+```java
+int result = calculate();
+```
+
+### 3. 代码风格 - 魔法数字
+**文件**: `src/main/java/com/example/Config.java`  
+**行号**: 10
+
+**问题代码**:
+```java
+int timeout = 30;
+```
+
+**问题描述**: 数字 30 是魔法数字，建议定义为常量并添加注释说明含义。
+
+**改进建议**:
+```java
+private static final int DEFAULT_TIMEOUT_SECONDS = 30;
+int timeout = DEFAULT_TIMEOUT_SECONDS;
+```
+
+---
+
+## 📝 总结
+
+本次审查共发现 **7 个问题**:
+- Critical: 1 个（需立即修复）
+- High: 2 个（建议尽快修复）
+- Medium: 1 个（计划修复）
+- Low: 3 个（逐步改进）
+
+建议优先修复 Critical 和 High 级别的问题，以确保代码安全性和稳定性。
+
+---
+
+*由 AI PR Review Assistant 自动生成*
 
 ---
 
@@ -338,7 +523,7 @@ jobs:
 
 ## 🏗️ 架构设计
 
-![AI PR Review Assistant 架构图](img.png)
+![img.png](img.png)
 
 ### 核心架构说明
 
