@@ -57,7 +57,7 @@ public class ReviewController {
     }
 
     @GetMapping("/progress/{taskId}")
-    public ResponseEntity<Map<String, Object>> getProgress(@PathVariable String taskId) {
+    public ResponseEntity<Map<String, Object>> getProgress(@PathVariable("taskId") String taskId) {
         ReviewProgress progress = progressMap.get(taskId);
         if (progress == null) {
             Map<String, Object> error = new HashMap<>();
