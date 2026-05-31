@@ -28,7 +28,7 @@
 mvn clean package -DskipTests
 ```
 
-构建成功后，会在 `target/` 目录生成 `pr-reviewer-1.0.0-SNAPSHOT.jar`
+构建成功后，会在 `target/` 目录生成 `ai-pr-review-assistant-1.0.0-SNAPSHOT.jar`
 
 ### 第二步：配置 API Key
 
@@ -58,7 +58,18 @@ java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar config init
 
 ### 第三步：开始使用！
 
-#### 方式 1：命令行使用
+#### 方式 1：Web UI（推荐，界面友好）
+
+```bash
+# 启动 Web 服务
+mvn spring-boot:run
+```
+
+然后打开浏览器访问：http://localhost:8080
+
+在网页中输入仓库和 PR 号，点击"开始审查"即可！
+
+#### 方式 2：命令行使用
 
 ```bash
 # 语法：java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review <仓库> <PR号>
@@ -76,17 +87,6 @@ java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review owner/repo 123
 java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar --help
 java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review --help
 ```
-
-#### 方式 2：Web UI 使用
-
-```bash
-# 启动 Web 服务
-mvn spring-boot:run
-```
-
-然后打开浏览器访问：http://localhost:8080
-
-在网页中输入仓库和 PR 号，点击"开始审查"即可！
 
 ---
 
