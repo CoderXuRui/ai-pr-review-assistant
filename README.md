@@ -40,9 +40,11 @@
 ### 测试环境准备
 
 你可以使用以下示例项目进行测试：
-- **测试仓库**：`CoderXuRui/pr-test`
+- **测试仓库**：https://github.com/CoderXuRui/pr-test
 - **PR 1**：简单的测试 PR（推荐先试这个）
 - **PR 2**：包含更多问题的测试 PR
+
+或者，你也可以在自己的仓库中新建分支，创建一些示例代码来测试！
 
 ### 第一步：构建项目
 
@@ -164,7 +166,7 @@ java -jar target/ai-pr-review-assistant-1.0.0-SNAPSHOT.jar review --help
 
 ## 📋 完整审查报告示例
 
-以下是审查 `CoderXuRui/java-bug-demo` PR 的完整报告示例：
+以下是审查 `CoderXuRui/pr-test` PR 的完整报告示例：
 
 ---
 
