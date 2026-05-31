@@ -338,7 +338,7 @@ jobs:
 
 ## 🏗️ 架构设计
 
-![AI PR Review Assistant 架构图](https://github.com/CoderXuRui/ai-pr-review-assistant/assets/architecture-diagram.png)
+![AI PR Review Assistant 架构图](img.png)
 
 ### 核心架构说明
 
