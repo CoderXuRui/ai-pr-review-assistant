@@ -445,6 +445,73 @@
             color: #1f2328;
             word-break: break-all;
         }
+
+        /* Progress */
+        .progress-container {
+            display: none;
+            background-color: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .progress-container.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2328;
+        }
+
+        .progress-percent {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0969da;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0969da, #2e9fff);
+            border-radius: 6px;
+            transition: width 0.3s ease-in;
+        }
+
+        .progress-message {
+            font-size: 14px;
+            color: #656d76;
+            margin-bottom: 8px;
+        }
+
+        .progress-file {
+            font-size: 13px;
+            color: #0969da;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+        }
     </style>
 </head>
 <body>
@@ -526,6 +593,19 @@
 
         <!-- Status -->
         <div id="status" class="status"></div>
+
+        <!-- Progress -->
+        <div id="progressContainer" class="progress-container">
+            <div class="progress-header">
+                <span class="progress-title">🤖 正在审查 Pull Request</span>
+                <span id="progressPercent" class="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div id="progressMessage" class="progress-message">初始化审查任务...</div>
+            <div id="progressFile" class="progress-file"></div>
+        </div>
 
         <!-- Results -->
         <div id="results" class="results card">
@@ -631,8 +711,22 @@
             btn.disabled = true;
             btn.textContent = '⏳ 正在审查...';
 
-            showStatus('loading', '正在连接 GitHub 并获取 PR 信息...');
+            document.getElementById('status').style.display = 'none';
             document.getElementById('results').classList.remove('show');
+
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressMessage = document.getElementById('progressMessage');
+            const progressFile = document.getElementById('progressFile');
+
+            progressContainer.classList.add('show');
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            progressMessage.textContent = '初始化审查任务...';
+            progressFile.textContent = '';
+
+            let pollInterval = null;
 
             try {
                 const response = await fetch('/api/review', {
@@ -644,12 +738,40 @@
                 const result = await response.json();
 
                 if (result.status === 'error') {
+                    progressContainer.classList.remove('show');
                     showStatus('error', '审查失败: ' + result.error);
                 } else {
-                    showStatus('success', '🎉 审查完成！');
-                    showResults(result);
+                    const taskId = result.taskId;
+
+                    pollInterval = setInterval(async () => {
+                        try {
+                            const progressRes = await fetch('/api/progress/' + taskId);
+                            const progress = await progressRes.json();
+
+                            progressPercent.textContent = (progress.percentage || 0) + '%';
+                            progressBar.style.width = (progress.percentage || 0) + '%';
+                            progressMessage.textContent = progress.message || '';
+                            if (progress.currentFile) {
+                                progressFile.textContent = '📄 ' + progress.currentFile;
+                            }
+
+                            if (progress.status === 'complete') {
+                                clearInterval(pollInterval);
+                                progressContainer.classList.remove('show');
+                                showStatus('success', '🎉 审查完成！');
+                                showResults(progress.result);
+                            } else if (progress.status === 'error') {
+                                clearInterval(pollInterval);
+                                progressContainer.classList.remove('show');
+                                showStatus('error', progress.message || '审查失败！');
+                            }
+                        } catch (e) {
+                            console.error('Progress poll error', e);
+                        }
+                    }, 500);
                 }
             } catch (e) {
+                progressContainer.classList.remove('show');
                 showStatus('error', '请求失败: ' + e.message);
             }
 

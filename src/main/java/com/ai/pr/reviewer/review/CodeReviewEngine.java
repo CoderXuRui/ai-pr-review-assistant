@@ -19,6 +19,16 @@ import java.util.List;
 public class CodeReviewEngine {
     private static final Logger logger = LoggerFactory.getLogger(CodeReviewEngine.class);
 
+    public interface ProgressListener {
+        void onProgress(String file, int current, int total);
+    }
+
+    private ProgressListener progressListener = null;
+
+    public void setProgressListener(ProgressListener listener) {
+        this.progressListener = listener;
+    }
+
     private final ReviewConfig config;
     private final AiClient aiClient;
     private final CodeChunker chunker;
@@ -44,14 +54,28 @@ public class CodeReviewEngine {
         String repoName = prInfo.getRepositoryName();
         int prNumber = prInfo.getNumber();
 
+        int fileIndex = 0;
+        int totalFiles = fileChanges.size();
+
         for (FileChange file : fileChanges) {
+            fileIndex++;
             if (file.getChangeType() == FileChange.ChangeType.DELETED) {
                 logger.info("Skipping deleted file: {}", file.getFileName());
+                if (progressListener != null) {
+                    progressListener.onProgress(file.getFileName(), fileIndex, totalFiles);
+                }
                 continue;
             }
             if (file.getLanguage() == ProgrammingLanguage.UNKNOWN) {
                 logger.info("Skipping file with unknown language: {}", file.getFileName());
+                if (progressListener != null) {
+                    progressListener.onProgress(file.getFileName(), fileIndex, totalFiles);
+                }
                 continue;
+            }
+
+            if (progressListener != null) {
+                progressListener.onProgress(file.getFileName(), fileIndex, totalFiles);
             }
             allFindings.addAll(reviewFileWithCache(repoOwner, repoName, prNumber, file));
         }
