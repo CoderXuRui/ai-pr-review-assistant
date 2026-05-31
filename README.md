@@ -336,6 +336,48 @@ jobs:
 
 ---
 
+## 🏗️ 架构设计
+
+![AI PR Review Assistant 架构图](https://github.com/CoderXuRui/ai-pr-review-assistant/assets/architecture-diagram.png)
+
+### 核心架构说明
+
+#### 1. **接入层（Access Layer）**
+- **CLI 入口**：`PrReviewerApplication.java` - 命令行模式主入口
+- **Web 入口**：`ReviewController.java` - REST API 控制器
+- 支持两种使用方式：命令行工具 & Web 服务
+
+#### 2. **业务逻辑层（Business Logic Layer）**
+- **CodeReviewEngine**：核心审查引擎，协调整个审查流程
+- **PullRequestFetcher**：GitHub PR 信息拉取
+- **FileReviewCache**：智能文件缓存，使用 SHA-256 哈希节省 Token
+- **ProgressTracker**：实时进度追踪器
+
+#### 3. **集成层（Integration Layer）**
+- **GitHub 集成**：使用 kohsuke/github-api 操作 PR
+- **AI 模型集成**：LangChain4j 统一封装 Claude/DeepSeek
+- **配置管理**：支持 YAML 文件、环境变量、CLI 参数三级配置
+
+#### 4. **输出层（Output Layer）**
+- **Markdown 报告生成**：结构化展示审查结果
+- **PR 评论发布**：自动发布到 GitHub PR
+- **控制台输出**：CLI 模式实时输出
+
+### 数据流
+
+```
+用户请求 → 配置加载 → PR 信息拉取 → 文件过滤 → 缓存检查 
+→ AI 审查 → 结果聚合 → Markdown 生成 → 输出/发布
+```
+
+### 核心设计亮点
+
+1. **智能缓存机制**：SHA-256 文件内容哈希 + 本地文件存储
+2. **异步任务处理**：ExecutorService 后台执行 + 轮询进度查询
+3. **灵活配置体系**：YAML 文件 → 环境变量 → CLI 参数，优先级覆盖
+4. **多模型支持**：Claude/DeepSeek 可切换，统一抽象
+5. **可扩展审查分类**：BUG/SECURITY/PERFORMANCE/STYLE 四维一体
+
 ## 🛠️ 技术栈
 
 - **Java 17+**: 主要开发语言
